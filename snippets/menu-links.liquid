@@ -1,0 +1,82 @@
+{% doc %}
+  Renders a Shopify menu, including its supported nested links.
+
+  @param {linklist} menu - Shopify menu selected in a section setting.
+  @param {string} menu_class - Class applied to the top-level list.
+{% enddoc %}
+
+{% if menu != blank and menu.links.size > 0 %}
+  {% liquid
+    assign legacy_collection_url = collections['the-collection'].url
+    assign has_rendered_catalogue_link = false
+  %}
+  <ul class="{{ menu_class }}">
+    {% for link in menu.links %}
+      {% unless link.url == routes.collections_url %}
+        {% liquid
+          assign link_label = link.title
+          assign link_url = link.url
+          assign is_catalogue_link = false
+          assign is_current_link = link.current
+          if link.url == routes.all_products_collection_url or link.url == legacy_collection_url
+            assign is_catalogue_link = true
+            assign link_label = 'collections.title' | t
+            assign link_url = routes.all_products_collection_url
+            if request.path == routes.all_products_collection_url
+              assign is_current_link = true
+            endif
+          endif
+        %}
+        {% if is_catalogue_link and has_rendered_catalogue_link %}{% continue %}{% endif %}
+        {% if is_catalogue_link %}{% assign has_rendered_catalogue_link = true %}{% endif %}
+        <li class="coco-navigation__item{% if link.links.size > 0 %} coco-navigation__item--has-children{% endif %}">
+          <a
+            class="coco-navigation__link"
+            href="{{ link_url }}"
+            {% if is_current_link %}aria-current="page"{% endif %}
+          >
+            {{ link_label | escape }}
+          </a>
+          {% if link.links.size > 0 %}
+            <ul class="coco-navigation__sub-list">
+              {% for child_link in link.links %}
+                {% liquid
+                  assign child_link_label = child_link.title
+                  assign child_link_url = child_link.url
+                  if child_link.url == legacy_collection_url
+                    assign child_link_label = 'collections.title' | t
+                    assign child_link_url = routes.all_products_collection_url
+                  endif
+                %}
+                <li>
+                  <a href="{{ child_link_url }}"{% if child_link.current %} aria-current="page"{% endif %}>
+                    {{ child_link_label | escape }}
+                  </a>
+                  {% if child_link.links.size > 0 %}
+                    <ul class="coco-navigation__sub-list coco-navigation__sub-list--nested">
+                      {% for grandchild_link in child_link.links %}
+                        {% liquid
+                          assign grandchild_link_label = grandchild_link.title
+                          assign grandchild_link_url = grandchild_link.url
+                          if grandchild_link.url == legacy_collection_url
+                            assign grandchild_link_label = 'collections.title' | t
+                            assign grandchild_link_url = routes.all_products_collection_url
+                          endif
+                        %}
+                        <li>
+                          <a href="{{ grandchild_link_url }}"{% if grandchild_link.current %} aria-current="page"{% endif %}>
+                            {{ grandchild_link_label | escape }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endunless %}
+    {% endfor %}
+  </ul>
+{% endif %}

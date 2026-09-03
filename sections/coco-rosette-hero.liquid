@@ -1,56 +1,151 @@
 {% liquid
+  assign has_cta = false
   assign cta_url = section.settings.cta_link | default: routes.all_products_collection_url
+  assign hero_alt = section.settings.hero_alt
+  assign default_hero_alt = 'A dog wearing a white couture gown at a wedding ceremony'
+  if section.settings.cta_label != blank
+    assign has_cta = true
+  endif
+  if hero_alt == blank
+    if section.settings.hero_image != blank
+      assign hero_alt = section.settings.hero_image.alt
+    endif
+  endif
+  if hero_alt == blank
+    assign hero_alt = default_hero_alt
+  endif
 %}
 
-<section class="coco-hero" aria-labelledby="coco-hero-title">
+<section class="coco-hero" aria-labelledby="CocoHeroTitle-{{ section.id }}">
+  <div class="coco-hero__confetti" aria-hidden="true">
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--rose-one"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--blue-one"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--orange-one"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--rose-two"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--blue-two"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--orange-two"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--rose-three"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--rose-four"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--blue-three"></span>
+    <span class="coco-hero__confetti-piece coco-hero__confetti-piece--orange-three"></span>
+  </div>
   <div class="coco-hero__copy coco-fade-up">
-    <h1 id="coco-hero-title" class="coco-hero__title">Because it's their day too — luxury couture for dogs</h1>
-    {% if section.settings.headline_image != blank %}
-      {{ section.settings.headline_image | image_url: width: 1430 | image_tag: alt: "Because it's their day too — luxury couture for dogs", widths: '480, 715, 1000, 1430', class: 'coco-hero__headline-image' }}
-    {% else %}
-      <img src="{{ 'headline.png' | asset_url }}" width="715" height="410" alt="Because it's their day too — luxury couture for dogs" class="coco-hero__headline-image">
+    <h1 id="CocoHeroTitle-{{ section.id }}" class="coco-hero__title">
+      <span class="coco-hero__title-roman">{{ section.settings.heading_roman | escape }}</span>
+      <span class="coco-hero__title-italic">{{ section.settings.heading_italic | escape }}</span>
+    </h1>
+    <span class="coco-divider" aria-hidden="true"></span>
+    {% if section.settings.subtitle != blank %}
+      <p class="coco-hero__subtitle">{{ section.settings.subtitle | escape }}</p>
     {% endif %}
-    <a class="coco-button" href="{{ cta_url }}">{{ section.settings.cta_label | escape }}</a>
+    {% if has_cta %}
+      <a class="coco-button" href="{{ cta_url }}">{{ section.settings.cta_label | escape }}</a>
+    {% endif %}
   </div>
 
   <div class="coco-hero__visual coco-fade-up">
-    {% if section.settings.hero_image != blank %}
-      {{ section.settings.hero_image | image_url: width: 1600 | image_tag: alt: section.settings.hero_alt, widths: '600, 900, 1200, 1600', class: 'coco-hero__visual-image' }}
-    {% else %}
-      <img src="{{ 'hero-visual.png' | asset_url }}" width="1178" height="1097" alt="A Coco Rosette floral couture gown" class="coco-hero__visual-image">
+    <div class="coco-hero__frame">
+      {% if section.settings.hero_image != blank %}
+        {% render 'responsive-image',
+          image: section.settings.hero_image,
+          alt: hero_alt,
+          class: 'coco-hero__visual-image',
+          width: 2400,
+          widths: '640, 900, 1200, 1600, 2000, 2400',
+          sizes: '(min-width: 900px) 52vw, 100vw',
+          loading: 'eager',
+          fetchpriority: 'high'
+        %}
+      {% else %}
+        <img
+          src="{{ 'coco-rosette-hero-wedding-dog.jpeg' | asset_url }}"
+          width="1696"
+          height="1696"
+          alt="{{ hero_alt | escape }}"
+          class="coco-hero__visual-image"
+          loading="eager"
+          fetchpriority="high"
+        >
+      {% endif %}
+    </div>
+    {% if section.settings.show_corner_ornament %}
+      <span class="coco-hero__corner-ornament" aria-hidden="true">
+        <img src="{{ 'coco-rosette-hero-corner.png' | asset_url }}" width="512" height="512" alt="" class="coco-hero__corner-ornament-image" loading="lazy">
+      </span>
     {% endif %}
   </div>
-
-  <img src="{{ 'sprig.png' | asset_url }}" width="120" height="150" alt="" class="coco-hero__sprig" loading="lazy">
+  <img
+    src="{{ 'coco-rosette-hero-left-sprig.png' | asset_url }}"
+    width="240"
+    height="300"
+    alt=""
+    class="coco-hero__left-sprig"
+    aria-hidden="true"
+    loading="lazy"
+  >
 </section>
 
 {% stylesheet %}
-  .coco-hero { align-items: center; display: grid; gap: 40px; grid-template-columns: 5fr 6fr; min-height: min(720px, calc(100vh - 100px)); padding: 34px 56px 80px; position: relative; }
-  .coco-hero__copy { max-width: 560px; padding-left: 24px; }
-  .coco-hero__title { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0 0 0 0); white-space: nowrap; }
-  .coco-hero__headline-image { display: block; height: auto; max-width: 100%; width: 100%; }
-  .coco-button { background: var(--cr-rose-btn); color: #fff; display: inline-block; font-family: var(--cr-sans); font-size: 11px; font-weight: 400; letter-spacing: .28em; margin-top: 40px; padding: 14px 36px; text-decoration: none; text-transform: uppercase; transition: background .3s ease; }
-  .coco-button:hover { background: var(--cr-rose-btn-hover); }
-  .coco-hero__visual { justify-self: end; max-width: 672px; width: 100%; }
-  .coco-hero__visual-image { display: block; height: auto; width: 100%; }
-  .coco-hero__sprig { bottom: 40px; display: block; height: auto; left: 56px; position: absolute; width: 96px; }
-  .coco-fade-up { animation: coco-fade-up .9s ease both; }
-  .coco-hero__visual.coco-fade-up { animation-delay: .15s; }
-  @keyframes coco-fade-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .coco-hero { display: grid; grid-template-columns: 5fr 6fr; align-items: center; gap: 2.5rem; min-height: min(45rem, calc(100vh - 6.25rem)); padding: 2.125rem var(--cr-gutter) 5rem; position: relative; }
+  .coco-hero__confetti { position: absolute; inset: 0; z-index: 0; overflow: clip; pointer-events: none; }
+  .coco-hero__confetti-piece { --coco-confetti-colour: var(--cr-rose); position: absolute; display: block; width: clamp(1.25rem, 2.1vw, 1.9rem); height: clamp(0.45rem, 0.75vw, 0.65rem); border-radius: 18% 70% 15% 60% / 45% 32% 70% 30%; background: linear-gradient(100deg, transparent 0 5%, var(--coco-confetti-colour) 20% 82%, transparent 100%); opacity: 0.3; }
+  .coco-hero__confetti-piece::after { position: absolute; top: 16%; right: 10%; bottom: 14%; left: 8%; border-radius: inherit; background: var(--coco-confetti-colour); content: ''; filter: blur(1px); opacity: 0.32; transform: skewX(-14deg); }
+  .coco-hero__confetti-piece--rose-one { top: 14%; left: 10%; width: clamp(1.5rem, 2.3vw, 2rem); transform: rotate(25deg); }
+  .coco-hero__confetti-piece--blue-one { --coco-confetti-colour: var(--cr-rose-blue); top: 18%; left: 39%; width: clamp(1.1rem, 1.65vw, 1.5rem); height: clamp(0.4rem, 0.6vw, 0.55rem); transform: rotate(-32deg); }
+  .coco-hero__confetti-piece--orange-one { --coco-confetti-colour: var(--cr-rose-orange); top: 13%; left: 58%; width: clamp(1.4rem, 2vw, 1.8rem); height: clamp(0.52rem, 0.85vw, 0.72rem); transform: rotate(18deg); }
+  .coco-hero__confetti-piece--rose-two { top: 30%; left: 89%; width: clamp(1.15rem, 1.65vw, 1.5rem); transform: rotate(46deg); }
+  .coco-hero__confetti-piece--blue-two { --coco-confetti-colour: var(--cr-rose-blue); top: 73%; left: 47%; width: clamp(1.35rem, 1.9vw, 1.7rem); height: clamp(0.4rem, 0.65vw, 0.58rem); transform: rotate(-15deg); }
+  .coco-hero__confetti-piece--orange-two { --coco-confetti-colour: var(--cr-rose-orange); top: 80%; left: 18%; width: clamp(1rem, 1.45vw, 1.35rem); transform: rotate(36deg); }
+  .coco-hero__confetti-piece--rose-three { top: 69%; left: 74%; width: clamp(1.25rem, 1.75vw, 1.6rem); height: clamp(0.42rem, 0.7vw, 0.6rem); transform: rotate(-25deg); }
+  .coco-hero__confetti-piece--rose-four { top: 7%; left: 25%; width: clamp(2.4rem, 3.75vw, 3.4rem); height: clamp(0.7rem, 1.15vw, 1rem); transform: rotate(-18deg); }
+  .coco-hero__confetti-piece--blue-three { --coco-confetti-colour: var(--cr-rose-blue); top: 51%; left: 5%; width: clamp(1.45rem, 2.15vw, 1.95rem); height: clamp(0.5rem, 0.8vw, 0.7rem); transform: rotate(37deg); }
+  .coco-hero__confetti-piece--orange-three { --coco-confetti-colour: var(--cr-rose-orange); top: 77%; left: 34%; width: clamp(2rem, 3.1vw, 2.75rem); height: clamp(0.6rem, 1vw, 0.85rem); transform: rotate(-28deg); }
+  .coco-hero__copy { position: relative; z-index: 1; max-width: 35rem; padding-left: 1.5rem; }
+  .coco-hero__title { display: grid; margin: 0; font-family: var(--cr-hero-roman); font-weight: 400; line-height: 1.08; }
+  .coco-hero__title-roman { font-size: clamp(3.25rem, 5vw, 4.125rem); letter-spacing: -0.035em; }
+  .coco-hero__title-italic { margin-top: 0.05em; margin-left: 0.55em; font-family: var(--cr-hero-script); font-size: clamp(4.25rem, 6.75vw, 5.5rem); font-style: normal; font-weight: 400; font-feature-settings: 'calt' 1, 'liga' 1, 'swsh' 1; font-variant-ligatures: common-ligatures contextual; letter-spacing: -0.03em; line-height: 0.95; }
+  .coco-hero__subtitle { color: var(--cr-gray); font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.28em; line-height: 1.6; text-transform: uppercase; }
+  .coco-hero__copy .coco-button { min-width: 14.5rem; margin-top: 2.5rem; }
+  .coco-hero__visual { --cr-hero-ornament-width: clamp(9rem, 20vw, 13rem); --cr-hero-ornament-anchor-right: calc(0.5rem - var(--cr-gutter)); position: relative; z-index: 1; justify-self: end; width: 100%; max-width: 42rem; }
+  .coco-hero__frame { aspect-ratio: 1; width: 100%; overflow: hidden; padding: clamp(0.625rem, 1.2vw, 0.9375rem); border: 1px solid var(--cr-rose); border-radius: 999px 999px 0 0; background: var(--cr-bg); }
+  .coco-hero__visual-image { display: block; width: 100%; height: 100%; border-radius: 999px 999px 0 0; object-fit: cover; object-position: center; }
+  .coco-hero__corner-ornament { position: absolute; right: var(--cr-hero-ornament-anchor-right); bottom: -2rem; display: block; width: var(--cr-hero-ornament-width); aspect-ratio: 1; pointer-events: none; }
+  .coco-hero__corner-ornament-image { display: block; width: 100%; height: 100%; }
+  .coco-hero__left-sprig { position: absolute; z-index: 1; bottom: 2rem; left: var(--cr-gutter); display: block; width: clamp(5rem, 7.5vw, 6rem); height: auto; pointer-events: none; }
+  .coco-fade-up { animation: coco-fade-up 900ms ease both; }
+  .coco-hero__visual.coco-fade-up { animation-delay: 150ms; }
+  @keyframes coco-fade-up { from { opacity: 0; transform: translateY(1.5rem); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 900px) {
+    .coco-hero { gap: 1.5rem; padding-bottom: 4.75rem; }
+    .coco-hero__copy { padding-left: 0; }
+  }
+  @media (max-width: 700px) {
+    .coco-hero { grid-template-columns: 1fr; min-height: auto; padding-top: 1.5rem; }
+    .coco-hero__copy { justify-self: center; width: min(100%, 30rem); max-width: 30rem; text-align: center; }
+    .coco-hero__title { justify-items: center; max-width: 100%; }
+    .coco-hero__title-roman { font-size: clamp(2.75rem, 12vw, 3.25rem); }
+    .coco-hero__title-italic { margin-left: 0; font-size: clamp(2.25rem, 12.5vw, 3.25rem); }
+    .coco-hero__copy .coco-divider { margin-inline: auto; }
+    .coco-hero__visual { --cr-hero-ornament-width: clamp(7.5rem, 34vw, 10rem); justify-self: center; max-width: 35rem; }
+    .coco-hero__corner-ornament { right: var(--cr-hero-ornament-anchor-right); bottom: -1.25rem; width: var(--cr-hero-ornament-width); }
+    .coco-hero__left-sprig { display: none; }
+    .coco-hero__confetti-piece--rose-two, .coco-hero__confetti-piece--blue-two, .coco-hero__confetti-piece--orange-two, .coco-hero__confetti-piece--rose-three, .coco-hero__confetti-piece--rose-four, .coco-hero__confetti-piece--blue-three, .coco-hero__confetti-piece--orange-three { display: none; }
+  }
   @media (prefers-reduced-motion: reduce) { .coco-fade-up { animation: none; } }
-  @media (max-width: 900px) { .coco-hero { gap: 24px; padding: 28px 32px 76px; } .coco-hero__copy { padding-left: 0; } .coco-hero__sprig { bottom: 26px; left: 32px; width: 72px; } }
-  @media (max-width: 700px) { .coco-hero { grid-template-columns: 1fr; min-height: auto; padding-top: 22px; } .coco-hero__copy { max-width: 460px; } .coco-hero__visual { justify-self: center; max-width: 560px; } .coco-button { margin-top: 28px; } .coco-hero__sprig { display: none; } }
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "Coco Rosette hero",
   "settings": [
-    { "type": "image_picker", "id": "headline_image", "label": "Headline composition" },
-    { "type": "image_picker", "id": "hero_image", "label": "Hero composition" },
-    { "type": "text", "id": "hero_alt", "label": "Hero image description", "default": "A Coco Rosette floral couture gown" },
-    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Shop Couture" },
-    { "type": "url", "id": "cta_link", "label": "Button link" }
+    { "type": "text", "id": "heading_roman", "label": "First heading line", "default": "Because It’s" },
+    { "type": "text", "id": "heading_italic", "label": "Italic heading line", "default": "Their Day Too" },
+    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Luxury Couture for Dogs" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Shop couture" },
+    { "type": "url", "id": "cta_link", "label": "Button destination" },
+    { "type": "image_picker", "id": "hero_image", "label": "Approved hero image", "info": "Upload the approved high-resolution hero image. The floral corner ornament is rendered separately by this section." },
+    { "type": "checkbox", "id": "show_corner_ornament", "label": "Show floral corner ornament", "default": true, "info": "Turn off only when the selected image already includes the approved lower-right ornament." },
+    { "type": "text", "id": "hero_alt", "label": "Hero image description", "info": "Describe the product, garment, and visible scene for people who cannot see the image." }
   ],
   "presets": [{ "name": "Coco Rosette hero" }]
 }

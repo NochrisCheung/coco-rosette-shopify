@@ -1,0 +1,62 @@
+{% liquid
+  assign contact_form_errors_id = 'ContactFormErrors-' | append: section.id
+%}
+
+<section class="coco-contact coco-content">
+  <header class="coco-contact__header">
+    <p class="coco-eyebrow">{{ 'contact.eyebrow' | t }}</p>
+    <h1 class="coco-display">{% if page.title != blank %}{{ page.title | escape }}{% else %}{{ 'contact.title' | t }}{% endif %}</h1>
+    {% if page.content != blank %}<div class="coco-contact__intro rte">{{ page.content }}</div>{% endif %}
+  </header>
+
+  {% form 'contact', class: 'coco-contact__form' %}
+    {% if form.posted_successfully? %}
+      <p class="coco-contact__success" role="status">{{ 'contact.success' | t }}</p>
+    {% else %}
+      {% render 'form-errors', form: form, id: contact_form_errors_id %}
+      <div class="coco-contact__field-grid">
+        <div>
+          <label for="ContactName-{{ section.id }}">{{ 'contact.name' | t }}</label>
+          <input id="ContactName-{{ section.id }}" class="coco-field" type="text" name="contact[name]" value="{% if form.name %}{{ form.name | escape }}{% elsif customer %}{{ customer.name | escape }}{% endif %}" autocomplete="name">
+        </div>
+        <div>
+          <label for="ContactEmail-{{ section.id }}">{{ 'contact.email' | t }}</label>
+          <input id="ContactEmail-{{ section.id }}" class="coco-field" type="email" name="contact[email]" value="{% if form.email %}{{ form.email | escape }}{% elsif customer %}{{ customer.email | escape }}{% endif %}" autocomplete="email" required>
+        </div>
+        <div>
+          <label for="ContactOrder-{{ section.id }}">{{ 'contact.order_number' | t }}</label>
+          <input id="ContactOrder-{{ section.id }}" class="coco-field" type="text" name="contact[order_number]" value="{{ form.order_number | escape }}" autocomplete="off">
+        </div>
+      </div>
+      <div class="coco-contact__message-field">
+        <label for="ContactMessage-{{ section.id }}">{{ 'contact.message' | t }}</label>
+        <textarea id="ContactMessage-{{ section.id }}" class="coco-field" name="contact[body]" rows="8" required>{{ form.body | escape }}</textarea>
+      </div>
+      <button class="coco-button" type="submit">{{ 'contact.submit' | t }}</button>
+    {% endif %}
+  {% endform %}
+</section>
+
+{% stylesheet %}
+  .coco-contact { max-width: 48rem; padding-block: var(--cr-section-space); }
+  .coco-contact__header { margin-bottom: 2rem; text-align: center; }
+  .coco-contact__header .coco-eyebrow { margin-bottom: 0.75rem; }
+  .coco-contact__intro { margin-top: 1.25rem; color: var(--cr-gray); }
+  .coco-contact__intro > * + * { margin-top: 1rem; }
+  .coco-contact__field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+  .coco-contact__field-grid > div:last-child { grid-column: 1 / -1; }
+  .coco-contact label { display: block; margin-bottom: 0.5rem; font-size: 0.75rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
+  .coco-contact__message-field { margin-top: 1.25rem; }
+  .coco-contact textarea { resize: vertical; }
+  .coco-contact__form > .coco-button { margin-top: 1.25rem; }
+  .coco-contact__success { border: 1px solid var(--cr-divider); padding: 1.25rem; text-align: center; }
+  @media (max-width: 560px) { .coco-contact__field-grid { grid-template-columns: 1fr; } .coco-contact__field-grid > div:last-child { grid-column: auto; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Contact form",
+  "settings": [],
+  "disabled_on": { "groups": ["header", "footer"] }
+}
+{% endschema %}

@@ -1,0 +1,164 @@
+{% doc %}
+  Renders Shopify-native product filters, collection browse links, active filters, and sorting.
+
+  @param {object} results - A Liquid `collection` or `search` object.
+  @param {string} results_url - The page route used to apply the filter form.
+  @param {string} form_id - A page-unique HTML form ID.
+  @param {string} [search_terms] - Search query to retain when `results` is a search object.
+  @param {string} [active_collection_handle] - The collection handle currently being viewed.
+  @param {string} [surface] - Optional presentation variant for the current route.
+  @param {number} [product_count] - Optional count displayed in the filter toolbar.
+  @param {boolean} [hide_collection_links] - Hides the repeated collection links when the route renders its own collection navigation.
+{% enddoc %}
+
+{% liquid
+  assign current_sort = results.sort_by | default: results.default_sort_by
+  assign has_active_filters = false
+  assign has_open_filter = false
+  for filter in results.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != nil or filter.max_value.value != nil
+        assign has_active_filters = true
+      endif
+    elsif filter.active_values.size > 0
+      assign has_active_filters = true
+    endif
+  endfor
+%}
+
+<aside class="coco-facets{% if surface != blank %} coco-facets--{{ surface | handleize }}{% endif %}" aria-label="{{ 'search.filter_products' | t }}">
+  {% unless hide_collection_links %}
+    <nav class="coco-facets__collection-links" aria-label="{{ 'search.shop_by_collection' | t }}">
+      <p class="coco-facets__label">{{ 'search.collection' | t }}</p>
+      <ul class="coco-facets__link-list" role="list">
+        <li>
+          <a href="{{ routes.all_products_collection_url }}"{% if active_collection_handle == 'all' %} aria-current="page"{% endif %}>{{ 'search.all_products' | t }}</a>
+        </li>
+        <li>
+          <a href="{{ collections['wedding-dresses'].url }}"{% if active_collection_handle == 'wedding-dresses' %} aria-current="page"{% endif %}>{{ collections['wedding-dresses'].title | default: 'Wedding Dresses' | escape }}</a>
+        </li>
+        <li>
+          <a href="{{ collections['evening-gowns'].url }}"{% if active_collection_handle == 'evening-gowns' %} aria-current="page"{% endif %}>{{ collections['evening-gowns'].title | default: 'Evening Gowns' | escape }}</a>
+        </li>
+        <li>
+          <a href="{{ collections['casual'].url }}"{% if active_collection_handle == 'casual' %} aria-current="page"{% endif %}>{{ collections['casual'].title | default: 'Casual' | escape }}</a>
+        </li>
+      </ul>
+    </nav>
+  {% endunless %}
+
+  <form id="{{ form_id }}" class="coco-facets__form" action="{{ results_url }}" method="get">
+    {% if search_terms != blank %}
+      <input type="hidden" name="q" value="{{ search_terms | escape }}">
+      <input type="hidden" name="type" value="product">
+    {% endif %}
+
+    {% if results.filters.size > 0 %}
+      <div class="coco-facets__groups" data-facet-groups>
+        {% for filter in results.filters %}
+          {% liquid
+            assign is_filter_active = false
+            assign should_open_filter = false
+            if filter.active_values.size > 0 or filter.min_value.value != nil or filter.max_value.value != nil
+              assign is_filter_active = true
+            endif
+            if is_filter_active and has_open_filter == false
+              assign should_open_filter = true
+              assign has_open_filter = true
+            endif
+          %}
+          <details class="coco-facets__group"{% if should_open_filter %} open{% endif %}>
+            <summary>
+              <span>{{ filter.label | escape }}</span>
+              {% if filter.active_values.size > 0 %}<span class="coco-facets__active-count">{{ filter.active_values.size }}</span>{% endif %}
+            </summary>
+
+            <div class="coco-facets__group-content">
+              {% case filter.type %}
+                {% when 'list', 'boolean' %}
+                  <ul class="coco-facets__values" role="list">
+                    {% for filter_value in filter.values %}
+                      <li>
+                        <label class="coco-facets__value{% if filter_value.count == 0 and filter_value.active == false %} is-unavailable{% endif %}">
+                          <input
+                            type="checkbox"
+                            name="{{ filter_value.param_name }}"
+                            value="{{ filter_value.value }}"
+                            {% if filter_value.active %}checked{% endif %}
+                            {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}
+                          >
+                          {% if filter_value.display.type == 'colors' %}
+                            {% assign swatch_colour = filter_value.display.value | first %}
+                            <span class="coco-facets__swatch" style="--coco-filter-swatch: {{ swatch_colour | escape }}" aria-hidden="true"></span>
+                          {% endif %}
+                          <span>{{ filter_value.label | escape }}</span>
+                          <span class="coco-facets__value-count">{{ filter_value.count }}</span>
+                        </label>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% when 'price_range' %}
+                  <div class="coco-facets__price-range">
+                    <label for="Filter-{{ form_id }}-{{ filter.min_value.param_name | handleize }}">{{ 'search.price_from' | t }}</label>
+                    <div class="coco-facets__price-input">
+                      <span aria-hidden="true">{{ cart.currency.symbol }}</span>
+                      <input
+                        id="Filter-{{ form_id }}-{{ filter.min_value.param_name | handleize }}"
+                        class="coco-field"
+                        name="{{ filter.min_value.param_name }}"
+                        value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+                        type="number"
+                        inputmode="decimal"
+                        min="0"
+                        max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                        placeholder="0"
+                      >
+                    </div>
+                    <label for="Filter-{{ form_id }}-{{ filter.max_value.param_name | handleize }}">{{ 'search.price_to' | t }}</label>
+                    <div class="coco-facets__price-input">
+                      <span aria-hidden="true">{{ cart.currency.symbol }}</span>
+                      <input
+                        id="Filter-{{ form_id }}-{{ filter.max_value.param_name | handleize }}"
+                        class="coco-field"
+                        name="{{ filter.max_value.param_name }}"
+                        value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+                        type="number"
+                        inputmode="decimal"
+                        min="0"
+                        max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                        placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                      >
+                    </div>
+                  </div>
+              {% endcase %}
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if product_count != blank %}
+      <p class="coco-facets__count" role="status">{{ 'search.product_count' | t: count: product_count }}</p>
+    {% endif %}
+
+    <div class="coco-facets__sort">
+      <label class="coco-facets__label" for="SortBy-{{ form_id }}">{{ 'search.sort_by' | t }}</label>
+      <span class="coco-facets__sort-select">
+        <select id="SortBy-{{ form_id }}" class="coco-field" name="sort_by">
+          {% for option in results.sort_options %}
+            <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected="selected"{% endif %}>{{ option.name | escape }}</option>
+          {% endfor %}
+        </select>
+      </span>
+    </div>
+
+    {% if results.filters.size > 0 %}
+      <div class="coco-facets__actions">
+        <button class="coco-button coco-facets__apply" type="submit">{{ 'search.apply_filters' | t }}</button>
+        {% if has_active_filters %}
+          <a class="coco-text-link" href="{{ results_url }}?sort_by={{ current_sort | url_encode }}{% if search_terms != blank %}&amp;q={{ search_terms | url_encode }}&amp;type=product{% endif %}">{{ 'search.clear_all' | t }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </form>
+</aside>

@@ -1,0 +1,22 @@
+{% doc %}
+  Renders one customer-selectable product option value.
+
+  @param {string} product_form_id - The parent product form identifier.
+  @param {product_option} option - The Shopify product option.
+  @param {product_option_value} option_value - The Shopify option value to render.
+{% enddoc %}
+
+{% assign input_id = product_form_id | append: '-Option-' | append: option.position | append: '-' | append: option_value.id %}
+<input
+  id="{{ input_id }}"
+  class="coco-product__option-input"
+  type="radio"
+  name="option-{{ option.position }}"
+  value="{{ option_value.name | escape }}"
+  data-option-value-id="{{ option_value.id }}"
+  {% if option.name == 'Size' and option_value.name == 'Custom size' %}data-custom-size-option{% endif %}
+  {% if option_value.product_url != blank %}data-option-product-url="{{ option_value.product_url | escape }}"{% endif %}
+  {% if option_value.selected %}checked{% endif %}
+  {% unless option_value.available %}disabled{% endunless %}
+>
+<label class="coco-product__option-label" for="{{ input_id }}"{% if option.name == 'Size' and option_value.name == 'Custom size' %} data-custom-size-option-label{% endif %}>{{ option_value.name | escape }}</label>

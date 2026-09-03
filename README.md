@@ -1,160 +1,67 @@
-<h1 align="center" style="position: relative;">
-  <br>
-    <img src="./assets/shoppy-x-ray.svg" alt="logo" width="200">
-  <br>
-  Shopify Skeleton Theme
-</h1>
+# Coco Rosette Shopify Theme
 
-A minimal, carefully structured Shopify theme designed to help you quickly get started. Designed with modularity, maintainability, and Shopify's best practices in mind.
+This is the deployable Liquid theme for Coco Rosette, a made-to-order luxury dogwear storefront. It is a Shopify Online Store 2.0 theme, not a React or headless implementation.
 
-<p align="center">
-  <a href="./LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
-  <a href="./actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Shopify/skeleton-theme/actions/workflows/ci.yml/badge.svg"></a>
-</p>
+The theme is independently version-controlled inside this directory. The workspace root is not a Git repository.
 
-## Getting started
+## Storefront direction
 
-### Prerequisites
+- English uses British English throughout.
+- The current customer journey is Home, Collections, product pages, bag/cart, support pages, and native Shopify policies.
+- `/collections/all` is the primary All Dogwear catalogue route. Customer-facing search and blog journeys are intentionally excluded.
+- The technical Shopify `/search` route remains valid but is unpromoted and no-indexed.
+- New or revised Coco Rosette identity and botanical delivery assets are PNG-first. Product and hero photography are Shopify-managed media.
 
-Before starting, ensure you have the latest Shopify CLI installed:
+Read the workspace [agent guide](../AGENTS.md), [brand guidelines](../guidelines_and_examples/Brand_Guidelines_EN.md), [asset manifest](../docs/assets/asset_manifest.md), and [Shopify development guidelines](../docs/engineering/shopify_development_guidelines.md) before changing the theme.
 
-- [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) – helps you download, upload, preview themes, and streamline your workflows
+## Directory structure
 
-If you use VS Code:
-
-- [Shopify Liquid VS Code Extension](https://shopify.dev/docs/storefronts/themes/tools/shopify-liquid-vscode) – provides syntax highlighting, linting, inline documentation, and auto-completion specifically designed for Liquid templates
-
-### Clone
-
-Clone this repository using Git or Shopify CLI:
-
-```bash
-git clone git@github.com:Shopify/skeleton-theme.git
-# or
-shopify theme init
+```text
+assets/       Global CSS, JavaScript, fonts, and approved theme-owned PNG assets
+config/       Shopify theme settings
+layout/       Document shell and global resource loading
+locales/      Customer-facing and Theme Editor translations
+sections/     Route and merchant-configurable page regions
+snippets/     Reusable Liquid rendering primitives
+templates/    JSON route composition and required Liquid templates
 ```
 
-### Preview
+## Local development
 
-Preview this theme using Shopify CLI:
+Install the current [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) and authenticate through Shopify’s supported flow. From this directory:
 
-```bash
-shopify theme dev
+```sh
+shopify theme dev --store 1w5nxy-1m.myshopify.com
 ```
 
-## Theme architecture
+Use a development or unpublished theme for all work. Confirm the target theme name and ID before a remote write.
 
-```bash
-.
-├── assets          # Stores static assets (CSS, JS, images, fonts, etc.)
-├── blocks          # Reusable, nestable, customizable UI components
-├── config          # Global theme settings and customization options
-├── layout          # Top-level wrappers for pages (layout templates)
-├── locales         # Translation files for theme internationalization
-├── sections        # Modular full-width page components
-├── snippets        # Reusable Liquid code or HTML fragments
-└── templates       # Templates combining sections to define page structures
+## Required checks
+
+Run these from this directory before handing off a theme change:
+
+```sh
+shopify theme check
+git diff --check
+node --check assets/theme.js
 ```
 
-To learn more, refer to the [theme architecture documentation](https://shopify.dev/docs/storefronts/themes/architecture).
+Review the affected route at desktop and narrow mobile widths. Verify semantic landmarks, keyboard navigation, focus visibility, reduced-motion behaviour, blank states, and real Shopify product/variant data where applicable.
 
-### Templates
+## Theme-owned versus Shopify-owned content
 
-[Templates](https://shopify.dev/docs/storefronts/themes/architecture/templates#template-types) control what's rendered on each type of page in a theme.
+| Theme-owned | Shopify-owned |
+| --- | --- |
+| Layout, styling, interaction code, locale strings, approved PNG identity/botanical delivery assets, self-hosted web fonts | Products, variants, product media, collection membership, pages, menus, policies, Markets, shipping, taxes, checkout, global SEO preferences, and final hero media |
 
-The Skeleton Theme scaffolds [JSON templates](https://shopify.dev/docs/storefronts/themes/architecture/templates/json-templates) to make it easy for merchants to customize their store.
+Do not duplicate Shopify-owned product media in `assets/`. Do not hard-code product titles, prices, availability, or policy destinations. Native policy links use Shopify policy objects.
 
-None of the template types are required, and not all of them are included in the Skeleton Theme. Refer to the [template types reference](https://shopify.dev/docs/storefronts/themes/architecture/templates#template-types) for a full list.
+## Catalogue operations
 
-### Sections
+The Etsy/Shopify SKU register is controlled outside this repository at `/Users/nochris/Library/Application Support/Coco Rosette/catalogue_sku_register.csv`; it is not a theme asset and must never be committed. Product-gallery refreshes, new-listing onboarding, and Online Store publication use the guarded procedure in [`../docs/operations/catalogue_sync_runbook.md`](../docs/operations/catalogue_sync_runbook.md). Do not use theme code or a generic import to overwrite Shopify-owned product copy, pricing, operational SKUs, Custom size variants, publication, or collection assignment.
 
-[Sections](https://shopify.dev/docs/storefronts/themes/architecture/sections) are Liquid files that allow you to create reusable modules of content that can be customized by merchants. They can also include blocks which allow merchants to add, remove, and reorder content within a section.
+## Deployment boundary
 
-Sections are made customizable by including a `{% schema %}` in the body. For more information, refer to the [section schema documentation](https://shopify.dev/docs/storefronts/themes/architecture/sections/section-schema).
+`shopify theme push` is a remote write. Upload only reviewed files to the identified development or unpublished theme. Do not run `shopify theme publish`, modify the live theme, delete a remote theme, or change Shopify administration settings without explicit merchant approval for that exact action.
 
-### Blocks
-
-[Blocks](https://shopify.dev/docs/storefronts/themes/architecture/blocks) let developers create flexible layouts by breaking down sections into smaller, reusable pieces of Liquid. Each block has its own set of settings, and can be added, removed, and reordered within a section.
-
-Blocks are made customizable by including a `{% schema %}` in the body. For more information, refer to the [block schema documentation](https://shopify.dev/docs/storefronts/themes/architecture/blocks/theme-blocks/schema).
-
-## Schemas
-
-When developing components defined by schema settings, we recommend these guidelines to simplify your code:
-
-- **Single property settings**: For settings that correspond to a single CSS property, use CSS variables:
-
-  ```liquid
-  <div class="collection" style="--gap: {{ block.settings.gap }}px">
-    ...
-  </div>
-
-  {% stylesheet %}
-    .collection {
-      gap: var(--gap);
-    }
-  {% endstylesheet %}
-
-  {% schema %}
-  {
-    "settings": [{
-      "type": "range",
-      "label": "gap",
-      "id": "gap",
-      "min": 0,
-      "max": 100,
-      "unit": "px",
-      "default": 0,
-    }]
-  }
-  {% endschema %}
-  ```
-
-- **Multiple property settings**: For settings that control multiple CSS properties, use CSS classes:
-
-  ```liquid
-  <div class="collection {{ block.settings.layout }}">
-    ...
-  </div>
-
-  {% stylesheet %}
-    .collection--full-width {
-      /* multiple styles */
-    }
-    .collection--narrow {
-      /* multiple styles */
-    }
-  {% endstylesheet %}
-
-  {% schema %}
-  {
-    "settings": [{
-      "type": "select",
-      "id": "layout",
-      "label": "layout",
-      "values": [
-        { "value": "collection--full-width", "label": "t:options.full" },
-        { "value": "collection--narrow", "label": "t:options.narrow" }
-      ]
-    }]
-  }
-  {% endschema %}
-  ```
-
-## CSS & JavaScript
-
-For CSS and JavaScript, we recommend using the [`{% stylesheet %}`](https://shopify.dev/docs/api/liquid/tags#stylesheet) and [`{% javascript %}`](https://shopify.dev/docs/api/liquid/tags/javascript) tags. They can be included multiple times, but the code will only appear once.
-
-### `critical.css`
-
-The Skeleton Theme explicitly separates essential CSS necessary for every page into a dedicated `critical.css` file.
-
-## Contributing
-
-We're excited for your contributions to the Skeleton Theme! This repository aims to remain as lean, lightweight, and fundamental as possible, and we kindly ask your contributions to align with this intention.
-
-Visit our [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed overview of our process, guidelines, and recommendations.
-
-## License
-
-Skeleton Theme is open-sourced under the [MIT](./LICENSE.md) License.
+The current release boundary, theme IDs, known limitations, and outstanding merchant decisions are maintained in the master record at `../docs/implementation_plans/implementation_plan_2026-08-25_coco_rosette_storefront_v0.md`.

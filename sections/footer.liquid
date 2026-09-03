@@ -1,44 +1,112 @@
+{% liquid
+  assign has_site_links = false
+  assign has_legal_links = false
+
+  if shop.shipping_policy != blank or shop.refund_policy != blank or shop.privacy_policy != blank or shop.terms_of_service != blank
+    assign has_legal_links = true
+  endif
+
+  if section.settings.menu != blank and section.settings.menu.links.size > 0
+    for link in section.settings.menu.links
+      assign is_legal_link = false
+
+      if link.url == routes.search_url
+        assign is_legal_link = true
+      elsif shop.shipping_policy != blank and link.url == shop.shipping_policy.url
+        assign is_legal_link = true
+      elsif shop.refund_policy != blank and link.url == shop.refund_policy.url
+        assign is_legal_link = true
+      elsif shop.privacy_policy != blank and link.url == shop.privacy_policy.url
+        assign is_legal_link = true
+      elsif shop.terms_of_service != blank and link.url == shop.terms_of_service.url
+        assign is_legal_link = true
+      endif
+
+      unless is_legal_link
+        assign has_site_links = true
+        break
+      endunless
+    endfor
+  endif
+%}
+
 <footer class="coco-footer">
   <div class="coco-footer__main">
-    <a class="coco-footer__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | default: 'Coco Rosette' | escape }} home">
-      {% if section.settings.logo != blank %}
-        {{ section.settings.logo | image_url: width: 600 | image_tag: alt: 'Coco Rosette', class: 'coco-footer__logo-image' }}
-      {% else %}
-        <img src="{{ 'logo.svg' | asset_url }}" width="575" height="55" alt="Coco Rosette" class="coco-footer__logo-image">
-      {% endif %}
+    <a class="coco-footer__logo" href="{{ routes.root_url }}" aria-label="{{ 'accessibility.home' | t: shop_name: shop.name | escape }}">
+      {% render 'logo', class: 'coco-footer__logo-image', width: 230 %}
     </a>
 
-    <nav class="coco-footer__nav" aria-label="Footer navigation">
-      {% if section.settings.menu != blank and section.settings.menu.links.size > 0 %}
-        {% for link in section.settings.menu.links %}
-          <a href="{{ link.url }}">{{ link.title }}</a>
+    {% if has_site_links %}
+      <nav class="coco-footer__navigation" aria-label="{{ 'accessibility.footer_navigation' | t }}">
+        <ul class="coco-footer__navigation-list" role="list">
+          {% for link in section.settings.menu.links %}
+            {% liquid
+              assign is_legal_link = false
+
+              if link.url == routes.search_url
+                assign is_legal_link = true
+              elsif shop.shipping_policy != blank and link.url == shop.shipping_policy.url
+                assign is_legal_link = true
+              elsif shop.refund_policy != blank and link.url == shop.refund_policy.url
+                assign is_legal_link = true
+              elsif shop.privacy_policy != blank and link.url == shop.privacy_policy.url
+                assign is_legal_link = true
+              elsif shop.terms_of_service != blank and link.url == shop.terms_of_service.url
+                assign is_legal_link = true
+              endif
+            %}
+            {% unless is_legal_link %}
+              <li><a href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title | escape }}</a></li>
+            {% endunless %}
+          {% endfor %}
+        </ul>
+      </nav>
+    {% endif %}
+
+    {% if section.blocks.size > 0 %}
+      <ul class="coco-footer__social-links" role="list">
+        {% for block in section.blocks %}
+          {% if block.settings.url != blank and block.settings.label != blank %}
+            <li {{ block.shopify_attributes }}><a href="{{ block.settings.url | escape }}">{{ block.settings.label | escape }}</a></li>
+          {% endif %}
         {% endfor %}
-      {% else %}
-        <a href="#collection">Shop</a>
-        <a href="#collection">Collections</a>
-        <a href="#story">About</a>
-        <a href="mailto:{{ shop.email }}">Contact</a>
-      {% endif %}
-    </nav>
+      </ul>
+    {% endif %}
   </div>
-  <p class="coco-footer__copyright">© {{ 'now' | date: '%Y' }} COCO ROSETTE — BECAUSE IT'S THEIR DAY TOO</p>
+  <div class="coco-footer__footnotes">
+    <p class="coco-footer__copyright">© {{ 'now' | date: '%Y' }} Coco Rosette — {{ 'brand.tagline' | t }}</p>
+    {% if has_legal_links %}
+      <nav class="coco-footer__legal" aria-label="{{ 'accessibility.legal_navigation' | t }}">
+        <ul class="coco-footer__legal-list" role="list">
+          {% if shop.shipping_policy != blank %}<li><a href="{{ shop.shipping_policy.url }}">{{ 'footer.delivery_policy' | t }}</a></li>{% endif %}
+          {% if shop.refund_policy != blank %}<li><a href="{{ shop.refund_policy.url }}">{{ 'footer.returns_and_refunds' | t }}</a></li>{% endif %}
+          {% if shop.privacy_policy != blank %}<li><a href="{{ shop.privacy_policy.url }}">{{ 'footer.privacy_policy' | t }}</a></li>{% endif %}
+          {% if shop.terms_of_service != blank %}<li><a href="{{ shop.terms_of_service.url }}">{{ 'footer.terms_of_service' | t }}</a></li>{% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
 </footer>
 
 {% stylesheet %}
-  .coco-footer { border-top: 1px solid var(--cr-divider); margin: 0 56px; padding: 64px 0 36px; }
-  .coco-footer__main { align-items: center; display: flex; gap: 32px; justify-content: space-between; }
-  .coco-footer__logo { display: block; }
-  .coco-footer__logo-image { display: block; height: auto; width: 180px; }
-  .coco-footer__nav { display: flex; flex-wrap: wrap; gap: 28px; justify-content: flex-end; }
-  .coco-footer a,
-  .coco-footer__copyright { color: var(--cr-gray); font-family: var(--cr-sans); font-size: 10px; font-weight: 300; letter-spacing: .28em; text-decoration: none; text-transform: uppercase; }
+  .coco-footer { margin-inline: var(--cr-gutter); padding: 4rem 0 2.25rem; border-top: 1px solid var(--cr-divider); }
+  .coco-footer__main { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+  .coco-footer__logo { display: block; flex: 0 0 auto; }
+  .coco-footer__logo-image { width: 11.25rem; height: auto; }
+  .coco-footer__navigation-list, .coco-footer__social-links, .coco-footer__legal-list { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; }
+  .coco-footer__navigation-list, .coco-footer__social-links { justify-content: flex-end; gap: 1rem 1.75rem; }
+  .coco-footer a, .coco-footer__copyright { color: var(--cr-gray); font-size: 0.625rem; font-weight: 400; letter-spacing: 0.22em; line-height: 1.6; text-decoration: none; text-transform: uppercase; }
   .coco-footer a:hover { color: var(--cr-ink); }
-  .coco-footer__copyright { margin-top: 40px; text-align: center; }
-  @media (max-width: 760px) {
-    .coco-footer { margin: 0 32px; padding: 48px 0 28px; }
-    .coco-footer__main { align-items: center; flex-direction: column; }
-    .coco-footer__nav { justify-content: center; row-gap: 16px; }
-    .coco-footer__copyright { font-size: 9px; line-height: 1.8; }
+  .coco-footer__footnotes { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem 2.5rem; margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--cr-divider); }
+  .coco-footer__copyright { margin: 0; }
+  .coco-footer__legal-list { justify-content: flex-end; gap: 0.5rem 1.25rem; }
+  .coco-footer__legal a { font-size: 0.5625rem; letter-spacing: 0.16em; }
+  @media (max-width: 700px) {
+    .coco-footer { padding-top: 3rem; }
+    .coco-footer__main { flex-direction: column; }
+    .coco-footer__navigation-list, .coco-footer__social-links { justify-content: center; }
+    .coco-footer__footnotes { flex-direction: column; text-align: center; }
+    .coco-footer__legal-list { justify-content: center; }
   }
 {% endstylesheet %}
 
@@ -46,8 +114,24 @@
 {
   "name": "Coco Rosette footer",
   "settings": [
-    { "type": "image_picker", "id": "logo", "label": "Logo override" },
-    { "type": "link_list", "id": "menu", "label": "Menu" }
-  ]
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Footer navigation",
+      "default": "footer",
+      "info": "Add Collections, support, contact, and other customer pages in Shopify Admin. Legal policies render automatically below."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "social_link",
+      "name": "Social link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Accessible label" },
+        { "type": "url", "id": "url", "label": "Destination" }
+      ]
+    }
+  ],
+  "max_blocks": 5
 }
 {% endschema %}

@@ -1,0 +1,20 @@
+{% doc %}
+  Renders the approved Coco Rosette wordmark from the theme asset bundle.
+
+  @param {string} [class] - Additional CSS class for the image.
+  @param {string} [alt] - Accessible name for the wordmark.
+  @param {number} [width] - Intrinsic width exposed to the browser.
+{% enddoc %}
+
+{% liquid
+  assign logo_alt = alt | default: shop.name | default: 'Coco Rosette'
+  assign logo_width = width | default: 1150
+%}
+
+<img
+  src="{{ 'coco-rosette-wordmark.png' | asset_url }}"
+  width="{{ logo_width }}"
+  height="110"
+  alt="{{ logo_alt | escape }}"
+  class="{{ class }}"
+>

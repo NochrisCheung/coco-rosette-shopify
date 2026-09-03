@@ -1,17 +1,29 @@
-{% comment %}
-  This section is used in the page template to render store pages like About us
-  or Contact us.
+<article class="coco-page-content coco-content">
+  <header class="coco-page-content__header">
+    <p class="coco-eyebrow">{{ 'pages.eyebrow' | t }}</p>
+    <h1 class="coco-display">{{ page.title | escape }}</h1>
+  </header>
+  {% if page.content != blank %}
+    <div class="coco-page-content__body rte">{{ page.content }}</div>
+  {% endif %}
+</article>
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/page
-{% endcomment %}
-
-<h1>{{ page.title }}</h1>
-
-{{ page.content }}
+{% stylesheet %}
+  .coco-page-content { max-width: 48rem; padding-block: var(--cr-section-space); }
+  .coco-page-content__header { margin-bottom: 2rem; text-align: center; }
+  .coco-page-content__header .coco-eyebrow { margin-bottom: 0.75rem; }
+  .coco-page-content__body { font-size: 0.9375rem; }
+  .coco-page-content__body > * + * { margin-top: 1rem; }
+  .coco-page-content__body h2, .coco-page-content__body h3 { margin-top: 2rem; font-family: var(--cr-serif); font-weight: 500; }
+  .coco-page-content__body h2 { font-size: 1.75rem; }
+  .coco-page-content__body h3 { font-size: 1.35rem; }
+  .coco-page-content__body ul, .coco-page-content__body ol { padding-left: 1.25rem; }
+{% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:general.page",
-  "settings": []
+  "name": "Page",
+  "settings": [],
+  "disabled_on": { "groups": ["header", "footer"] }
 }
 {% endschema %}

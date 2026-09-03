@@ -15,7 +15,9 @@
     },
     "collection": {
       "type": "coco-rosette-collection",
-      "settings": {}
+      "settings": {
+        "collection": "the-collection"
+      }
     },
     "story": {
       "type": "coco-rosette-story",

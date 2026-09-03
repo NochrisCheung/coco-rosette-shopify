@@ -1,0 +1,39 @@
+{% doc %}
+  Renders one product option in the canonical purchase order.
+
+  @param {string} product_form_id - The parent product form identifier.
+  @param {product_option} option - The Shopify product option.
+  @param {page} size_guide_page - The shared Size guide Page, when available.
+{% enddoc %}
+
+<fieldset
+  class="coco-product__option"
+  data-product-option="{{ option.position | minus: 1 }}"
+  data-product-option-position="{{ option.position }}"
+  data-product-option-name="{{ option.name | handleize }}"
+>
+  <legend class="coco-product__option-heading">
+    <span class="coco-ui-label">{{ option.name | escape }}</span>
+    {% if option.name == 'Size' and size_guide_page != blank %}
+      <a class="coco-product__size-guide-link" href="{{ size_guide_page.url }}">{{ 'products.size_guide' | t }}</a>
+    {% endif %}
+  </legend>
+  <div class="coco-product__option-values">
+    {% if option.name == 'Size' %}
+      {% for option_value in option.values %}
+        {% unless option_value.name == 'Custom size' %}
+          {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value %}
+        {% endunless %}
+      {% endfor %}
+      {% for option_value in option.values %}
+        {% if option_value.name == 'Custom size' %}
+          {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value %}
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% for option_value in option.values %}
+        {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</fieldset>

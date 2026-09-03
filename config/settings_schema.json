@@ -1,82 +1,35 @@
 [
   {
     "name": "theme_info",
-    "theme_name": "Skeleton",
+    "theme_name": "Coco Rosette",
     "theme_version": "0.1.0",
-    "theme_author": "Shopify",
+    "theme_author": "Coco Rosette",
     "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
     "theme_support_url": "https://support.shopify.com/"
   },
   {
-    "name": "t:general.typography",
+    "name": "Brand assets",
     "settings": [
       {
-        "type": "header",
-        "content": "t:general.fonts"
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon override",
+        "info": "The approved rose mark is used when this is empty."
       },
       {
-        "type": "font_picker",
-        "id": "type_primary_font",
-        "default": "work_sans_n4",
-        "label": "t:general.primary"
+        "type": "image_picker",
+        "id": "social_share_image",
+        "label": "Default social sharing image",
+        "info": "Use an approved 1200 × 630 px image. Product and collection images take priority when available."
       }
     ]
   },
   {
-    "name": "t:general.layout",
+    "name": "Storefront layout",
     "settings": [
       {
-        "type": "select",
-        "id": "max_page_width",
-        "label": "t:labels.page_width",
-        "options": [
-          {
-            "value": "90rem",
-            "label": "t:options.page_width.narrow"
-          },
-          {
-            "value": "110rem",
-            "label": "t:options.page_width.wide"
-          }
-        ],
-        "default": "90rem"
-      },
-      {
-        "type": "range",
-        "id": "min_page_margin",
-        "min": 10,
-        "max": 100,
-        "step": 1,
-        "unit": "px",
-        "label": "t:labels.page_margin",
-        "default": 20
-      }
-    ]
-  },
-  {
-    "name": "t:general.colors",
-    "settings": [
-      {
-        "type": "color",
-        "id": "background_color",
-        "default": "#FFFFFF",
-        "label": "t:labels.background"
-      },
-      {
-        "type": "color",
-        "id": "foreground_color",
-        "default": "#333333",
-        "label": "t:labels.foreground"
-      },
-      {
-        "type": "range",
-        "id": "input_corner_radius",
-        "min": 0,
-        "max": 10,
-        "step": 1,
-        "unit": "px",
-        "label": "t:labels.input_corner_radius",
-        "default": 4
+        "type": "paragraph",
+        "content": "Typography, colours, spacing, and component shapes are fixed by the Coco Rosette brand system. Edit editorial content through sections, products, collections, pages, and navigation."
       }
     ]
   }

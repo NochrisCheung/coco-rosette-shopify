@@ -1,0 +1,158 @@
+<coco-cart-drawer
+  data-section-id="{{ section.id }}"
+  data-refresh-error="{{ 'cart.refresh_error' | t | escape }}"
+  data-update-error="{{ 'cart.update_error' | t | escape }}"
+  data-add-error="{{ 'cart.add_error' | t | escape }}"
+  data-item-added="{{ 'cart.item_added' | t | escape }}"
+  data-item-removed="{{ 'cart.item_removed' | t | escape }}"
+  data-updated="{{ 'cart.updated' | t | escape }}"
+>
+  <dialog id="CartDrawer" class="coco-cart-drawer" aria-labelledby="CartDrawerTitle" data-cart-drawer>
+    <div class="coco-cart-drawer__panel">
+      <header class="coco-cart-drawer__header">
+        <h2 id="CartDrawerTitle" class="coco-display">{{ 'cart.bag' | t }}</h2>
+        <form method="dialog">
+          <button class="coco-icon-button" type="submit" aria-label="{{ 'accessibility.close' | t }}">
+            {% render 'icon', name: 'close', class: 'coco-icon' %}
+          </button>
+        </form>
+      </header>
+
+      <div class="coco-cart-drawer__content" data-cart-drawer-content>
+        {% if cart.item_count > 0 %}
+          <ul class="coco-cart-drawer__items" role="list">
+            {% for item in cart.items %}
+              {% liquid
+                assign item_product_title = item.product.title | escape
+                assign item_image_alt = item.image.alt | default: item.product.title
+              %}
+              <li class="coco-cart-drawer__item">
+                <a class="coco-cart-drawer__image-link" href="{{ item.url }}">
+                  {% if item.image != blank %}
+                    {% render 'responsive-image',
+                      image: item.image,
+                      alt: item_image_alt,
+                      class: 'coco-cart-drawer__image',
+                      width: 240,
+                      widths: '160, 240, 320',
+                      sizes: '112px',
+                      loading: 'lazy'
+                    %}
+                  {% endif %}
+                </a>
+
+                <div class="coco-cart-drawer__item-details">
+                  <a class="coco-cart-drawer__product-title" href="{{ item.url }}">{{ item_product_title }}</a>
+                  {% unless item.product.has_only_default_variant %}
+                    <p class="coco-cart-drawer__variant">{{ item.variant.title | escape }}</p>
+                  {% endunless %}
+                  {% unless item.properties == empty %}
+                    <ul class="coco-cart-drawer__properties" role="list">
+                      {% for property in item.properties %}
+                        {% assign property_first_character = property.first | slice: 0 %}
+                        {% if property.last != blank and property_first_character != '_' %}
+                          <li>{{ property.first | escape }}: {{ property.last | escape }}</li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  {% endunless %}
+
+                  {% if item.line_level_discount_allocations.size > 0 %}
+                    <ul class="coco-cart-drawer__discounts" role="list">
+                      {% for discount_allocation in item.line_level_discount_allocations %}
+                        <li>{{ discount_allocation.discount_application.title | escape }} −{{ discount_allocation.amount | money }}</li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+
+                  <p class="coco-cart-drawer__line-price">
+                    {% if item.original_line_price > item.final_line_price %}<s>{{ item.original_line_price | money }}</s>{% endif %}
+                    <span>{{ item.final_line_price | money }}</span>
+                  </p>
+
+                  <form class="coco-cart-drawer__quantity-form" data-cart-change-form>
+                    <input type="hidden" name="id" value="{{ item.key }}">
+                    <label class="coco-visually-hidden" for="CartDrawerQuantity-{{ item.key }}">{{ 'cart.quantity' | t: product: item.product.title | escape }}</label>
+                    <div class="coco-quantity-input">
+                      <button type="button" data-quantity-button="decrease" aria-label="{{ 'cart.decrease_quantity' | t: product: item.product.title | escape }}">{% render 'icon', name: 'minus', class: 'coco-icon' %}</button>
+                      <input id="CartDrawerQuantity-{{ item.key }}" type="number" name="quantity" value="{{ item.quantity }}" min="0" inputmode="numeric">
+                      <button type="button" data-quantity-button="increase" aria-label="{{ 'cart.increase_quantity' | t: product: item.product.title | escape }}">{% render 'icon', name: 'plus', class: 'coco-icon' %}</button>
+                    </div>
+                    <button class="coco-text-link" type="submit">{{ 'cart.update' | t }}</button>
+                  </form>
+
+                  <a class="coco-text-link" href="{{ item.url_to_remove }}" data-cart-remove="{{ item.key }}">{{ 'cart.remove' | t }}</a>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <footer class="coco-cart-drawer__footer">
+            {% if cart.cart_level_discount_applications.size > 0 %}
+              <ul class="coco-cart-drawer__discounts" role="list">
+                {% for discount_application in cart.cart_level_discount_applications %}
+                  <li>{{ discount_application.title | escape }} −{{ discount_application.total_allocated_amount | money }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            <p class="coco-cart-drawer__subtotal"><span>{{ 'cart.subtotal' | t }}</span><strong>{{ cart.total_price | money }}</strong></p>
+            <p class="coco-cart-drawer__delivery-promise">{{ 'products.delivery_promise' | t }}</p>
+            <form action="{{ routes.cart_url }}" method="post">
+              <button class="coco-button coco-cart-drawer__checkout" type="submit" name="checkout">{{ 'cart.checkout' | t }}</button>
+            </form>
+            <a class="coco-button--secondary" href="{{ routes.cart_url }}">{{ 'cart.view_bag' | t }}</a>
+          </footer>
+        {% else %}
+          <div class="coco-empty-state coco-cart-drawer__empty">
+            <div>
+              <p>{{ 'cart.empty' | t }}</p>
+              <a class="coco-button" href="{{ routes.all_products_collection_url }}">{{ 'cart.continue_shopping' | t }}</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+      <p class="coco-cart-drawer__error" role="alert" hidden data-cart-drawer-error></p>
+      <p class="coco-visually-hidden" aria-live="polite" data-cart-drawer-status></p>
+    </div>
+  </dialog>
+</coco-cart-drawer>
+
+{% stylesheet %}
+  .coco-cart-drawer { width: min(100%, 32rem); max-width: none; height: 100dvh; max-height: none; margin: 0 0 0 auto; border: 0; padding: 0; background: var(--cr-bg); color: var(--cr-ink); }
+  .coco-cart-drawer::backdrop, .coco-mobile-navigation::backdrop { background: var(--cr-overlay); }
+  .coco-cart-drawer__panel { display: flex; height: 100%; flex-direction: column; }
+  .coco-cart-drawer__header, .coco-cart-drawer__footer { padding-inline: clamp(1.25rem, 4vw, 2.5rem); }
+  .coco-cart-drawer__header { display: flex; align-items: center; justify-content: space-between; min-height: 5.5rem; border-bottom: 1px solid var(--cr-divider); }
+  .coco-cart-drawer__header .coco-display { font-size: 2rem; }
+  .coco-icon { width: 1.375rem; height: 1.375rem; }
+  .coco-cart-drawer__content { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+  .coco-cart-drawer__items { display: grid; gap: 1.5rem; margin: 0; padding: 1.5rem clamp(1.25rem, 4vw, 2.5rem); overflow: auto; }
+  .coco-cart-drawer__item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: 1rem; }
+  .coco-cart-drawer__image-link { align-self: start; aspect-ratio: 2 / 3; overflow: hidden; background: var(--cr-white); }
+  .coco-cart-drawer__image { width: 100%; height: 100%; object-fit: cover; }
+  .coco-cart-drawer__item-details { min-width: 0; }
+  .coco-cart-drawer__product-title { font-family: var(--cr-serif); font-size: 1.125rem; font-weight: 500; line-height: 1.25; text-decoration: none; }
+  .coco-cart-drawer__variant, .coco-cart-drawer__properties, .coco-cart-drawer__line-price, .coco-cart-drawer__delivery-promise { margin-top: 0.375rem; color: var(--cr-gray); font-size: 0.8125rem; }
+  .coco-cart-drawer__properties { padding: 0; }
+  .coco-cart-drawer__discounts { margin: 0; padding: 0; color: var(--cr-rose); font-size: 0.8125rem; list-style: none; }
+  .coco-cart-drawer__line-price span { margin-left: 0.35rem; }
+  .coco-cart-drawer__quantity-form { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem; }
+  .coco-quantity-input { display: inline-grid; grid-template-columns: 2rem 2.5rem 2rem; align-items: center; border: 1px solid var(--cr-divider); }
+  .coco-quantity-input button { display: grid; width: 2rem; height: 2rem; place-items: center; border: 0; background: transparent; }
+  .coco-quantity-input .coco-icon { width: 1rem; height: 1rem; }
+  .coco-quantity-input input { width: 100%; border: 0; background: transparent; text-align: center; }
+  .coco-quantity-input input::-webkit-inner-spin-button, .coco-quantity-input input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+  .coco-cart-drawer__footer { display: grid; gap: 0.75rem; padding-block: 1.5rem; border-top: 1px solid var(--cr-divider); }
+  .coco-cart-drawer__subtotal { display: flex; justify-content: space-between; font-family: var(--cr-serif); font-size: 1.25rem; }
+  .coco-cart-drawer__checkout, .coco-cart-drawer__footer .coco-button--secondary { width: 100%; }
+  .coco-cart-drawer__empty { flex: 1; margin: clamp(1.25rem, 4vw, 2.5rem); }
+  .coco-cart-drawer__empty .coco-button { margin-top: 1.25rem; }
+  .coco-cart-drawer__error { margin: 0; padding: 0.875rem clamp(1.25rem, 4vw, 2.5rem); border-top: 1px solid var(--cr-error); color: var(--cr-error); font-size: 0.8125rem; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Cart drawer",
+  "settings": []
+}
+{% endschema %}

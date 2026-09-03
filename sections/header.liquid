@@ -1,68 +1,152 @@
-<header class="coco-header">
-  <a class="coco-header__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | default: 'Coco Rosette' | escape }} home">
-    {% if section.settings.logo != blank %}
-      {{ section.settings.logo | image_url: width: 800 | image_tag: alt: 'Coco Rosette', widths: '240, 400, 800', class: 'coco-header__logo-image' }}
-    {% else %}
-      <img src="{{ 'logo.svg' | asset_url }}" width="575" height="55" alt="Coco Rosette" class="coco-header__logo-image">
-    {% endif %}
-  </a>
+{% liquid
+  assign has_menu = false
+  if section.settings.menu != blank and section.settings.menu.links.size > 0
+    assign has_menu = true
+  endif
+%}
 
-  <nav class="coco-header__nav" aria-label="Main navigation">
-    {% if section.settings.menu != blank and section.settings.menu.links.size > 0 %}
-      {% for link in section.settings.menu.links %}
-        <a href="{{ link.url }}">{{ link.title }}</a>
-      {% endfor %}
-    {% else %}
-      <a href="#collection">Shop</a>
-      <a href="#collection">Collections</a>
-      <a href="#story">About</a>
+<header class="coco-header" data-header>
+  <div class="coco-header__inner">
+    {% if has_menu %}
+      <button
+        class="coco-header__menu-button coco-icon-button"
+        type="button"
+        aria-label="{{ 'accessibility.open_menu' | t }}"
+        aria-controls="MobileNavigation"
+        aria-expanded="false"
+        data-mobile-navigation-trigger
+      >
+        {% render 'icon', name: 'menu', class: 'coco-icon' %}
+      </button>
     {% endif %}
-  </nav>
 
-  <a class="coco-header__cart" href="{{ routes.cart_url }}">
-    Bag{% if cart.item_count > 0 %}<span aria-hidden="true"> ({{ cart.item_count }})</span>{% endif %}
-    <span class="visually-hidden">, {{ cart.item_count }} items</span>
-  </a>
+    <a class="coco-header__logo" href="{{ routes.root_url }}" aria-label="{{ 'accessibility.home' | t: shop_name: shop.name | escape }}">
+      {% render 'logo', class: 'coco-header__logo-image' %}
+    </a>
+
+    <div class="coco-header__right">
+      {% if has_menu %}
+        <nav class="coco-header__navigation coco-header__navigation--desktop" aria-label="{{ 'accessibility.main_navigation' | t }}">
+          {% render 'menu-links', menu: section.settings.menu, menu_class: 'coco-navigation__list' %}
+        </nav>
+      {% endif %}
+
+      <a
+        class="coco-header__cart"
+        href="{{ routes.cart_url }}"
+        aria-controls="CartDrawer"
+        aria-labelledby="HeaderCartDescription-{{ section.id }}"
+        data-cart-drawer-trigger
+      >
+        {% render 'icon', name: 'bag', class: 'coco-icon' %}
+        <span class="coco-header__cart-count" aria-hidden="true" data-cart-count>{{ cart.item_count }}</span>
+        <span id="HeaderCartDescription-{{ section.id }}" class="coco-visually-hidden" data-cart-count-description data-cart-count-template="{{ 'cart.bag' | t }}: {{ 'cart.items_in_bag' | t: count: '__count__' }}">{{ 'cart.bag' | t }}: {{ 'cart.items_in_bag' | t: count: cart.item_count }}</span>
+      </a>
+    </div>
+  </div>
+
+  {% if has_menu %}
+    <dialog id="MobileNavigation" class="coco-mobile-navigation" aria-label="{{ 'accessibility.main_navigation' | t }}" data-mobile-navigation>
+      <div class="coco-mobile-navigation__panel">
+        <header class="coco-mobile-navigation__header">
+          <p class="coco-ui-label">{{ 'accessibility.main_navigation' | t }}</p>
+          <button class="coco-icon-button" type="button" aria-label="{{ 'accessibility.close' | t }}" data-mobile-navigation-close>
+            {% render 'icon', name: 'close', class: 'coco-icon' %}
+          </button>
+        </header>
+        <nav class="coco-header__navigation coco-header__navigation--mobile" aria-label="{{ 'accessibility.mobile_navigation' | t }}">
+          {% render 'menu-links', menu: section.settings.menu, menu_class: 'coco-navigation__list' %}
+        </nav>
+      </div>
+    </dialog>
+  {% endif %}
 </header>
 
 {% stylesheet %}
-  .coco-header {
-    align-items: center;
-    display: grid;
-    grid-template-columns: minmax(130px, 1fr) auto minmax(130px, 1fr);
-    min-height: 100px;
-    padding: 28px 56px 10px;
-  }
+  .shopify-section-group-header-group { position: sticky; z-index: 30; top: 0; }
+  .coco-header { position: relative; background: var(--cr-bg); }
+  .coco-header__inner { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); min-height: 6.25rem; padding: 1.75rem var(--cr-gutter) 0.625rem; }
   .coco-header__logo { display: block; width: fit-content; }
-  .coco-header__logo-image { display: block; height: auto; width: min(250px, 100%); }
-  .coco-header__nav { align-items: center; display: flex; gap: clamp(24px, 3.5vw, 52px); justify-content: center; }
-  .coco-header__nav a,
-  .coco-header__cart {
-    color: var(--cr-gray);
-    font-family: var(--cr-sans);
-    font-size: 11px;
-    font-weight: 300;
-    letter-spacing: .3em;
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: color .2s ease;
+  .coco-header__logo-image { width: min(15.625rem, 100%); height: auto; }
+  .coco-header__right { display: flex; align-items: center; justify-self: end; gap: clamp(1.5rem, 3.5vw, 4rem); }
+  .coco-navigation__list, .coco-navigation__sub-list { margin: 0; padding: 0; list-style: none; }
+  .coco-navigation__list { display: flex; align-items: center; gap: clamp(2rem, 4.5vw, 5rem); }
+  .coco-navigation__item { position: relative; }
+  .coco-navigation__link, .coco-navigation__sub-list a { color: var(--cr-gray); font-size: 0.6875rem; font-weight: 300; letter-spacing: 0.29em; line-height: 1.4; text-decoration: none; text-transform: uppercase; transition: color 160ms ease; }
+  .coco-navigation__link:hover, .coco-navigation__link[aria-current='page'], .coco-navigation__sub-list a:hover, .coco-navigation__sub-list a[aria-current='page'], .coco-header__cart:hover { color: var(--cr-ink); }
+  .coco-navigation__sub-list { position: absolute; z-index: 2; top: calc(100% + 0.75rem); left: -1rem; display: none; min-width: 12rem; border: 1px solid var(--cr-divider); background: var(--cr-bg); box-shadow: var(--cr-menu-shadow); }
+  .coco-navigation__item:hover > .coco-navigation__sub-list, .coco-navigation__item:focus-within > .coco-navigation__sub-list { display: block; }
+  .coco-navigation__sub-list li { padding: 0.75rem 1rem; }
+  .coco-navigation__sub-list--nested { position: static; display: block; min-width: 0; margin-top: 0.5rem; border: 0; box-shadow: none; }
+  .coco-navigation__sub-list--nested li { padding: 0.45rem 0 0 0.75rem; }
+  .coco-header__cart { position: relative; display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; color: var(--cr-gray); text-decoration: none; transition: color 160ms ease; }
+  .coco-header__cart .coco-icon { width: 1.375rem; height: 1.375rem; }
+  .coco-header__cart-count { position: absolute; right: -0.25rem; bottom: -0.2rem; display: grid; min-width: 1.125rem; height: 1.125rem; place-items: center; border: 1px solid var(--cr-bg); border-radius: 50%; background: var(--cr-rose); color: var(--cr-white); font-family: var(--cr-sans); font-size: 0.5625rem; font-weight: 400; letter-spacing: 0; line-height: 1; }
+  .coco-header__menu-button { display: none; }
+  .coco-mobile-navigation:not([open]) { display: none; }
+
+  @media (max-width: 850px) {
+    .coco-header__inner { grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem; gap: 0; min-height: 5.5rem; padding-top: 1.25rem; }
+    .coco-header__menu-button { display: inline-grid; }
+    .coco-header__logo { justify-self: center; }
+    .coco-header__logo-image { width: min(12.5rem, 100%); }
+    .coco-header__right { grid-column: 3; gap: 0; }
+    .coco-header__navigation--desktop { display: none; }
+    .coco-mobile-navigation[open] { display: block; width: min(83vw, 21rem); max-width: none; height: 100dvh; max-height: none; margin: 0 auto 0 0; border: 0; padding: 0; background: var(--cr-bg); }
+    .coco-mobile-navigation[open] .coco-mobile-navigation__panel { animation: coco-mobile-navigation-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .coco-mobile-navigation[open][data-closing='true'] .coco-mobile-navigation__panel { animation: coco-mobile-navigation-leave 240ms ease-in both; }
+    .coco-mobile-navigation[open]::backdrop { animation: coco-mobile-navigation-backdrop-enter 350ms ease-out both; }
+    .coco-mobile-navigation[open][data-closing='true']::backdrop { animation: coco-mobile-navigation-backdrop-leave 240ms ease-in both; }
+    .coco-mobile-navigation__panel { height: 100%; overflow-y: auto; }
+    .coco-mobile-navigation__header { display: flex; align-items: center; justify-content: space-between; min-height: 4.5rem; padding-inline: 1.25rem; border-bottom: 1px solid var(--cr-divider); }
+    .coco-header__navigation--mobile { padding: 0; }
+    .coco-header__navigation--mobile .coco-navigation__list { display: grid; gap: 0; }
+    .coco-header__navigation--mobile > .coco-navigation__list > .coco-navigation__item { border-bottom: 1px solid var(--cr-divider); animation: coco-mobile-navigation-item-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .coco-header__navigation--mobile > .coco-navigation__list > .coco-navigation__item:nth-child(2) { animation-delay: 50ms; }
+    .coco-header__navigation--mobile > .coco-navigation__list > .coco-navigation__item:nth-child(3) { animation-delay: 100ms; }
+    .coco-header__navigation--mobile > .coco-navigation__list > .coco-navigation__item:nth-child(4) { animation-delay: 150ms; }
+    .coco-header__navigation--mobile .coco-navigation__link { display: flex; align-items: center; min-height: 3.75rem; padding-inline: 1.25rem; color: var(--cr-ink); font-family: var(--cr-sans); font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.24em; text-transform: uppercase; }
+    .coco-header__navigation--mobile .coco-navigation__sub-list { position: static; display: grid; gap: 0; margin: 0; padding: 0 1.25rem 1rem; border: 0; background: transparent; box-shadow: none; }
+    .coco-header__navigation--mobile .coco-navigation__sub-list li { padding: 0; }
+    .coco-header__navigation--mobile .coco-navigation__sub-list a { display: block; padding: 0.5rem 0; font-size: 0.625rem; letter-spacing: 0.18em; }
   }
-  .coco-header__nav a:hover,
-  .coco-header__cart:hover { color: var(--cr-ink); }
-  .coco-header__cart { justify-self: end; letter-spacing: .24em; }
-  .visually-hidden {
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    position: absolute;
-    width: 1px;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
+
+  @keyframes coco-mobile-navigation-enter {
+    from { opacity: 0.7; transform: translateX(-1.75rem); }
+    to { opacity: 1; transform: translateX(0); }
   }
-  @media (max-width: 760px) {
-    .coco-header { grid-template-columns: 1fr auto; min-height: 82px; padding: 24px 32px 8px; }
-    .coco-header__logo-image { width: min(210px, 100%); }
-    .coco-header__nav { display: none; }
+
+  @keyframes coco-mobile-navigation-leave {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0.7; transform: translateX(-1.75rem); }
+  }
+
+  @keyframes coco-mobile-navigation-backdrop-enter {
+    from { background: rgb(37 36 37 / 0%); }
+    to { background: var(--cr-overlay); }
+  }
+
+  @keyframes coco-mobile-navigation-backdrop-leave {
+    from { background: var(--cr-overlay); }
+    to { background: rgb(37 36 37 / 0%); }
+  }
+
+  @keyframes coco-mobile-navigation-item-enter {
+    from { opacity: 0; transform: translateY(0.5rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 420px) {
+    .coco-header__inner { padding-inline: 1rem; }
+    .coco-header__logo-image { width: 10.5rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .coco-mobile-navigation[open] .coco-mobile-navigation__panel,
+    .coco-mobile-navigation[open][data-closing='true'] .coco-mobile-navigation__panel,
+    .coco-mobile-navigation[open]::backdrop,
+    .coco-mobile-navigation[open][data-closing='true']::backdrop,
+    .coco-header__navigation--mobile > .coco-navigation__list > .coco-navigation__item { animation: none; }
   }
 {% endstylesheet %}
 
@@ -70,8 +154,13 @@
 {
   "name": "Coco Rosette header",
   "settings": [
-    { "type": "image_picker", "id": "logo", "label": "Logo override" },
-    { "type": "link_list", "id": "menu", "label": "Menu" }
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Main navigation",
+      "default": "main-menu",
+      "info": "Manage destinations and labels in Shopify Admin. Nested menu links are supported."
+    }
   ]
 }
 {% endschema %}

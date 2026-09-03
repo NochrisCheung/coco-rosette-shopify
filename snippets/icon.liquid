@@ -1,0 +1,26 @@
+{% doc %}
+  Renders a decorative inline icon. The caller provides the accessible label or
+  visually-hidden text for an interactive control.
+
+  @param {string} name - One of `bag`, `close`, `menu`, `minus`, `plus`, `search`, or `arrow`.
+  @param {string} [class] - Additional CSS class for the SVG.
+{% enddoc %}
+
+<svg class="{{ class }}" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+  {% case name %}
+    {% when 'bag' %}
+      <path d="M5 8.5h14l-1 12H6l-1-12Zm4 0V6a3 3 0 0 1 6 0v2.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    {% when 'close' %}
+      <path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    {% when 'menu' %}
+      <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    {% when 'minus' %}
+      <path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    {% when 'plus' %}
+      <path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    {% when 'search' %}
+      <path d="m20 20-4.5-4.5m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    {% when 'arrow' %}
+      <path d="M4 12h15m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  {% endcase %}
+</svg>

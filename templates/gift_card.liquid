@@ -3,34 +3,22 @@
 <!doctype html>
 <html lang="{{ request.locale.iso_code }}">
   <head>
-    {% # Inlined CSS Variables %}
-    {% render 'css-variables' %}
-
-    {% # Load and preload the critical CSS %}
-    {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
-
-    {% # Social, title, etc. %}
     {% render 'meta-tags' %}
-
-    {% style %}
-      main {
-        text-align: center;
-      }
-      main img {
-        display: unset;
-      }
-    {% endstyle %}
+    {{ 'playfair-display-500-latin.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2' }}
+    {{ 'fonts.css' | asset_url | stylesheet_tag: preload: true }}
+    {{ 'theme.css' | asset_url | stylesheet_tag: preload: true }}
 
     {{ content_for_header }}
   </head>
 
-  <body>
-    <main>
-      <div class="shopify-section">
-        <h1>{{ gift_card.balance | money }}</h1>
+  <body class="coco-rosette template-gift-card">
+    <main id="MainContent" class="coco-page coco-gift-card" tabindex="-1">
+      <div class="coco-content coco-section coco-gift-card__content">
+        <p class="coco-eyebrow">{{ 'gift_card.card' | t }}</p>
+        <h1 class="coco-display">{{ gift_card.balance | money }}</h1>
 
         {% if gift_card.enabled == false or gift_card.expired %}
-          <p>{{ 'gift_card.expired' | t }}</p>
+          <p class="coco-form-errors" role="status">{{ 'gift_card.expired' | t }}</p>
         {% endif %}
 
         {% if gift_card.expires_on %}
@@ -44,18 +32,13 @@
           {% if settings.logo %}
             {{ settings.logo | image_url: width: 300 | image_tag: alt: shop.name }}
           {% else %}
-            <img
-              src="{{ 'gift-card/card.svg' | shopify_asset_url }}"
-              alt="{{ 'gift_card.card' | t }}"
-              width="300"
-              height="200"
-            >
+            {% render 'logo', width: 300 %}
           {% endif %}
         </p>
 
-        <h2>{{ shop.name }}</h2>
+        <h2 class="coco-gift-card__shop-name">{{ shop.name }}</h2>
         <p>{{ 'gift_card.use_at_checkout' | t }}</p>
-        <p>{{ gift_card.code | format_code }}</p>
+        <p class="coco-gift-card__code">{{ gift_card.code | format_code }}</p>
 
         {% if gift_card.pass_url %}
           <a href="{{ gift_card.pass_url }}">

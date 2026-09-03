@@ -2,22 +2,46 @@
   "404": {
     "title": "404",
     "not_found": "Page not found.",
+    "copy": "The page you are looking for is not available. Explore the collection instead.",
     "back_to_shopping": "Back to shopping"
   },
-  "blog": {
-    "article_comments": "Comments",
-    "article_metadata_html": "{{ date }} by {{ author }}",
-    "comment_form_body": "Comment",
-    "comment_form_email": "Email",
-    "comment_form_name": "Name",
-    "comment_form_submit": "Post",
-    "comment_form_title": "Add a comment"
+  "accessibility": {
+    "close": "Close",
+    "footer_navigation": "Footer pages",
+    "legal_navigation": "Legal information",
+    "home": "{{ shop_name }} home",
+    "main_navigation": "Main navigation",
+    "mobile_navigation": "Mobile navigation",
+    "open_menu": "Open menu",
+    "skip_to_content": "Skip to content"
+  },
+  "brand": {
+    "tagline": "Because It's Their Day Too",
+    "story_heading": "The Coco Rosette story"
   },
   "cart": {
+    "bag": "Bag",
+    "add_error": "Your item could not be added to the bag. Please try again.",
+    "continue_shopping": "Continue shopping",
     "checkout": "Checkout",
-    "title": "Cart",
+    "decrease_quantity": "Decrease quantity for {{ product }}",
+    "empty": "Your bag is currently empty.",
+    "increase_quantity": "Increase quantity for {{ product }}",
+    "items_in_bag": {
+      "one": "{{ count }} item in bag",
+      "other": "{{ count }} items in bag"
+    },
+    "item_added": "Item added to bag.",
+    "item_removed": "Item removed from bag.",
+    "refresh_error": "Your bag could not be refreshed. Please try again.",
+    "title": "Your bag",
+    "subtotal": "Subtotal",
     "update": "Update",
-    "remove": "Remove"
+    "update_error": "Your bag could not be updated. Please try again.",
+    "updated": "Bag updated.",
+    "remove": "Remove",
+    "quantity": "Quantity for {{ product }}",
+    "view_bag": "View bag"
   },
   "customers": {
     "login": {
@@ -28,7 +52,28 @@
     }
   },
   "collections": {
-    "title": "Collections"
+    "editor_empty": "Select a collection with available products to display this section.",
+    "empty": "There are no products in this collection yet.",
+    "eyebrow": "Coco Rosette",
+    "more_from": "More from {{ title }}",
+    "next": "Next",
+    "next_page": "Next page",
+    "page_number": "Page {{ number }}",
+    "pagination_label": "Collection pagination",
+    "previous": "Previous",
+    "previous_page": "Previous page",
+    "title": "Collections",
+    "view_all": "View all {{ title }}"
+  },
+  "contact": {
+    "email": "Email address",
+    "eyebrow": "Customer care",
+    "message": "How can we help?",
+    "name": "Name",
+    "order_number": "Order number (optional)",
+    "submit": "Send message",
+    "success": "Thank you. Your message has been sent.",
+    "title": "Contact us"
   },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
@@ -37,16 +82,72 @@
     "expires_on": "Expires on {{ expires_on }}",
     "use_at_checkout": "Use this gift card at checkout"
   },
+  "header": {
+    "account": "Account",
+    "search": "Search",
+    "sign_in": "Sign in"
+  },
+  "forms": {
+    "error_heading": "Please correct the following:"
+  },
+  "footer": {
+    "delivery_policy": "Delivery policy",
+    "returns_and_refunds": "Returns & refunds",
+    "privacy_policy": "Privacy policy",
+    "terms_of_service": "Terms of service"
+  },
   "password": {
+    "eyebrow": "Coco Rosette",
     "title": "This shop is private",
     "password": "Password",
     "enter": "Enter"
   },
+  "pages": {
+    "eyebrow": "Coco Rosette"
+  },
+  "products": {
+    "add_to_bag": "Add to bag",
+    "custom_size": {
+      "body_length": "Body length (cm)",
+      "chest": "Chest (cm)",
+      "description": "Enter your dog's measurements in centimetres.",
+      "javascript_required": "To order a Custom size, please enable JavaScript so that we can collect the required measurements.",
+      "measurements": "Custom size measurements",
+      "neck_circumference": "Neck circumference (cm)"
+    },
+    "decrease_quantity": "Decrease quantity",
+    "delivery_promise": "Made to order · delivery within 28 days of order.",
+    "from": "From",
+    "increase_quantity": "Increase quantity",
+    "options_refresh_error": "The selected options could not be updated. Please try again.",
+    "quantity": "Quantity",
+    "size_guide": "Size guide",
+    "unavailable": "This combination is unavailable.",
+    "view_details": "View details",
+    "view_media": "View product media {{ position }}",
+    "sold_out": "Sold out"
+  },
   "search": {
+    "all_products": "All products",
+    "apply_filters": "Apply filters",
+    "clear_all": "Clear all",
+    "collection": "Collection",
+    "eyebrow": "Discover Coco Rosette",
     "title": "Search",
-    "placeholder": "Search articles, pages, or products",
+    "shop_title": "All Dogwear",
+    "shop_by_collection": "Shop by collection",
+    "filter_products": "Filter products",
+    "sort_by": "Sort by",
+    "price_from": "From",
+    "price_to": "To",
+    "product_count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} products"
+    },
+    "placeholder": "Search products",
     "submit": "Search",
-    "no_results_html": "No results found for {{ terms }}",
-    "results_for_html": "{{ count }} results found for {{ terms }}"
+    "empty_query": "Enter a product name to search Coco Rosette.",
+    "no_results": "No results found for “{{ terms }}”.",
+    "results_for": "{{ count }} results found for “{{ terms }}”."
   }
 }

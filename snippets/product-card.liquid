@@ -1,0 +1,43 @@
+{% doc %}
+  Renders a concise product card for collection and search results.
+
+  @param {product} product - Product to render.
+  @param {string} [image_loading] - `lazy` or `eager`; defaults to `lazy`.
+{% enddoc %}
+
+{% liquid
+  assign product_card_image_alt = product.featured_image.alt | default: product.title
+  assign product_card_image_loading = image_loading | default: 'lazy'
+%}
+
+<article class="coco-product-card">
+  <a class="coco-product-card__link" href="{{ product.url }}">
+    <div class="coco-product-card__media">
+      {% if product.featured_image != blank %}
+        {% render 'responsive-image',
+          image: product.featured_image,
+          alt: product_card_image_alt,
+          class: 'coco-product-card__image',
+          width: 900,
+          widths: '320, 450, 600, 900',
+          sizes: '(min-width: 1000px) 25vw, (min-width: 700px) 50vw, 100vw',
+          loading: product_card_image_loading
+        %}
+      {% else %}
+        <div class="coco-product-card__media-placeholder" aria-hidden="true"></div>
+      {% endif %}
+      <span class="coco-product-card__action" aria-hidden="true">{{ 'products.view_details' | t }} <span aria-hidden="true">→</span></span>
+    </div>
+
+    <div class="coco-product-card__details">
+      {% if product.type != blank %}
+        <p class="coco-product-card__type">{{ product.type | escape }}</p>
+      {% endif %}
+      <h3 class="coco-product-card__title">{{ product.title | escape }}</h3>
+      {% render 'price', product: product, show_from: true %}
+      {% unless product.available %}
+        <p class="coco-product-card__availability">{{ 'products.sold_out' | t }}</p>
+      {% endunless %}
+    </div>
+  </a>
+</article>

@@ -1,47 +1,141 @@
-{% comment %}
-  This section is used in the collection template to render collection page
-  listing all products within a collection.
+{% liquid
+  assign collection_eyebrow = 'collections.eyebrow' | t
+  assign is_shop_page = false
+  if collection.handle == 'all'
+    assign is_shop_page = true
+  endif
+  assign collection_image_alt = collection.image.alt | default: collection.title
+  assign collection_facets_form_id = 'CollectionFacets-' | append: section.id
+%}
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
-{% endcomment %}
+<section class="coco-collection-page coco-collection-page--catalogue">
+  <header class="coco-collection-page__header coco-collection-page__header--catalogue coco-content">
+    {% if section.settings.show_image and collection.image != blank %}
+      <div class="coco-collection-page__image">
+        {% render 'responsive-image',
+          image: collection.image,
+          alt: collection_image_alt,
+          class: 'coco-collection-page__image-element',
+          width: 1800,
+          widths: '640, 960, 1280, 1600, 1800',
+          sizes: '100vw',
+          loading: 'eager',
+          fetchpriority: 'high'
+        %}
+      </div>
+    {% endif %}
+    <p class="coco-eyebrow">{{ collection_eyebrow | escape }}</p>
+    <h1 class="coco-display">{% if is_shop_page %}{{ 'search.shop_title' | t }}{% else %}{{ collection.title | escape }}{% endif %}</h1>
+    {% render 'rose-heading-ornament' %}
+    {% if collection.description != blank %}<div class="coco-collection-page__description rte">{{ collection.description }}</div>{% endif %}
+    <nav class="coco-catalogue-collection-links" aria-label="{{ 'search.shop_by_collection' | t }}">
+      <ul class="coco-catalogue-collection-links__list" role="list">
+        <li><a href="{{ routes.all_products_collection_url }}"{% if collection.handle == 'all' %} aria-current="page"{% endif %}>{{ 'search.all_products' | t }}</a></li>
+        <li><a href="{{ collections['wedding-dresses'].url }}"{% if collection.handle == 'wedding-dresses' %} aria-current="page"{% endif %}>{{ collections['wedding-dresses'].title | default: 'Wedding Dresses' | escape }}</a></li>
+        <li><a href="{{ collections['evening-gowns'].url }}"{% if collection.handle == 'evening-gowns' %} aria-current="page"{% endif %}>{{ collections['evening-gowns'].title | default: 'Evening Gowns' | escape }}</a></li>
+        <li><a href="{{ collections['casual'].url }}"{% if collection.handle == 'casual' %} aria-current="page"{% endif %}>{{ collections['casual'].title | default: 'Casual' | escape }}</a></li>
+      </ul>
+    </nav>
+  </header>
 
-<h1>{{ collection.title }}</h1>
+  {% paginate collection.products by section.settings.products_per_page %}
+    {% if collection.products_count > 0 %}
+      <div class="coco-catalogue-layout coco-content">
+        {% render 'product-facets',
+          results: collection,
+          results_url: collection.url,
+          form_id: collection_facets_form_id,
+          active_collection_handle: collection.handle,
+          surface: 'catalogue',
+          product_count: collection.products_count,
+          hide_collection_links: true
+        %}
 
-<div class="collection-products">
-  {% paginate collection.products by 20 %}
-    {% for product in collection.products %}
-      <div class="collection-product">
-        {% if product.featured_image %}
-          {% render 'image',
-            class: 'collection-product__image',
-            image: product.featured_image,
-            url: product.url,
-            width: 400,
-            height: 400,
-            crop: 'center'
-          %}
-        {% endif %}
-        <div class="collection-product__content">
-          <p>{{ product.title | escape | link_to: product.url }}</p>
-          <p>{{ product.price | money }}</p>
+        <div class="coco-catalogue-results">
+          <div class="coco-collection-page__grid">
+            {% for product in collection.products %}
+              {% render 'product-card', product: product %}
+            {% endfor %}
+          </div>
         </div>
       </div>
-    {% endfor %}
+      {% if paginate.pages > 1 %}
+        <nav class="coco-collection-page__pagination coco-content" aria-label="{{ 'collections.pagination_label' | t }}">
+          <div class="coco-collection-page__pagination-side coco-collection-page__pagination-side--previous">
+            {% if paginate.previous %}
+              <a class="coco-collection-page__pagination-direction" href="{{ paginate.previous.url }}" rel="prev" aria-label="{{ 'collections.previous_page' | t }}">
+                <span aria-hidden="true">←</span>
+                <span>{{ 'collections.previous' | t }}</span>
+              </a>
+            {% endif %}
+          </div>
 
-    {{ paginate | default_pagination }}
+          <ol class="coco-collection-page__pagination-pages" role="list">
+            {% for part in paginate.parts %}
+              <li>
+                {% if part.is_link %}
+                  <a class="coco-collection-page__pagination-number" href="{{ part.url }}" aria-label="{{ 'collections.page_number' | t: number: part.title }}">{{ part.title }}</a>
+                {% elsif part.title contains 'hellip' %}
+                  <span class="coco-collection-page__pagination-ellipsis" aria-hidden="true">&hellip;</span>
+                {% else %}
+                  <span class="coco-collection-page__pagination-number is-current" aria-current="page">{{ part.title }}</span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ol>
+
+          <div class="coco-collection-page__pagination-side coco-collection-page__pagination-side--next">
+            {% if paginate.next %}
+              <a class="coco-collection-page__pagination-direction" href="{{ paginate.next.url }}" rel="next" aria-label="{{ 'collections.next_page' | t }}">
+                <span>{{ 'collections.next' | t }}</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            {% endif %}
+          </div>
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="coco-content">
+        <div class="coco-empty-state">
+          <div>
+            <p>{{ 'collections.empty' | t }}</p>
+            <a class="coco-button" href="{{ routes.all_products_collection_url }}">{{ 'cart.continue_shopping' | t }}</a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
   {% endpaginate %}
-</div>
+</section>
 
 {% stylesheet %}
-  .collection-products {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-  }
+  .coco-collection-page { padding-block: 2rem var(--cr-section-space); }
+  .coco-collection-page__header { max-width: 48rem; margin-bottom: clamp(3rem, 7vw, 5rem); text-align: center; }
+  .coco-collection-page__header .coco-eyebrow { margin: 0 0 0.75rem; }
+  .coco-collection-page__image { margin-bottom: 2rem; overflow: hidden; }
+  .coco-collection-page__image-element { width: 100%; max-height: 31rem; object-fit: cover; }
+  .coco-collection-page__description { margin-top: 1.25rem; color: var(--cr-gray); font-size: 0.9375rem; }
+  .coco-collection-page__description > * + * { margin-top: 1rem; }
+  .coco-collection-page__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2.25rem; }
+  .coco-collection-page__pagination { display: grid; grid-template-columns: minmax(5.5rem, 7rem) auto minmax(5.5rem, 7rem); align-items: center; justify-content: center; gap: 1rem; margin-top: 4rem; }
+  .coco-collection-page__pagination-side--next { justify-self: end; }
+  .coco-collection-page__pagination-pages { display: flex; align-items: center; gap: 0.25rem; margin: 0; padding: 0; list-style: none; }
+  .coco-collection-page__pagination-number { display: inline-grid; width: 2.375rem; height: 2.375rem; place-items: center; border: 1px solid transparent; color: var(--cr-gray); font-family: var(--cr-sans); font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.08em; line-height: 1; text-decoration: none; transition: border-color 160ms ease, color 160ms ease; }
+  .coco-collection-page__pagination-number:hover { border-color: var(--cr-divider); color: var(--cr-ink); }
+  .coco-collection-page__pagination-number.is-current { border-color: var(--cr-rose); color: var(--cr-ink); }
+  .coco-collection-page__pagination-ellipsis { display: inline-grid; width: 1.5rem; height: 2.375rem; place-items: center; color: var(--cr-gray); }
+  .coco-collection-page__pagination-direction { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.375rem; color: var(--cr-ink); font-size: 0.625rem; font-weight: 400; letter-spacing: 0.18em; line-height: 1; text-decoration: none; text-transform: uppercase; transition: color 160ms ease; }
+  .coco-collection-page__pagination-direction:hover { color: var(--cr-rose); }
+  @media (max-width: 900px) { .coco-collection-page__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 1.25rem; } }
+  @media (max-width: 540px) { .coco-collection-page__pagination { grid-template-columns: minmax(5.25rem, 1fr) auto minmax(5.25rem, 1fr); gap: 0.5rem; margin-top: 3rem; } .coco-collection-page__pagination-direction { letter-spacing: 0.12em; } }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:general.collection",
-  "settings": []
+  "name": "Collection",
+  "settings": [
+    { "type": "checkbox", "id": "show_image", "label": "Show collection image", "default": true },
+    { "type": "range", "id": "products_per_page", "label": "Products per page", "min": 8, "max": 48, "step": 4, "default": 16 }
+  ],
+  "disabled_on": { "groups": ["header", "footer"] }
 }
 {% endschema %}

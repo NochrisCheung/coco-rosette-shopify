@@ -1,0 +1,34 @@
+{% doc %}
+  Renders a product or variant price, including the truthful compare-at state.
+
+  @param {product} product - Product whose price should be shown.
+  @param {variant} [variant] - Variant to show instead of the product range.
+  @param {boolean} [show_from] - Show a translated from label for varied product prices.
+{% enddoc %}
+
+{% liquid
+  assign current_price = product.price
+  assign compare_at_price = product.compare_at_price
+  assign price_varies = product.price_varies
+
+  if variant != blank
+    assign current_price = variant.price
+    assign compare_at_price = variant.compare_at_price
+    assign price_varies = false
+  endif
+
+  assign on_sale = false
+  if compare_at_price > current_price
+    assign on_sale = true
+  endif
+%}
+
+<p class="coco-price{% if on_sale %} coco-price--sale{% endif %}">
+  {% if show_from and price_varies %}
+    <span class="coco-price__from">{{ 'products.from' | t }}</span>
+  {% endif %}
+  {% if on_sale %}
+    <s class="coco-price__compare">{{ compare_at_price | money }}</s>
+  {% endif %}
+  <span class="coco-price__current">{{ current_price | money }}</span>
+</p>

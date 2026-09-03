@@ -1,0 +1,57 @@
+{% doc %}
+  Renders a Shopify-hosted image with responsive sources and intrinsic dimensions.
+
+  @param {image} image - Shopify image object to render.
+  @param {string} [alt] - Alternative text. Pass an empty string for decorative images.
+  @param {string} [class] - CSS class for the image.
+  @param {number} [width] - Largest image width Shopify should generate.
+  @param {string} [widths] - Comma-separated responsive widths.
+  @param {string} [sizes] - Responsive sizes attribute.
+  @param {string} [loading] - `eager` or `lazy`; defaults to `lazy`.
+  @param {string} [fetchpriority] - Pass `high` only for the confirmed LCP image.
+{% enddoc %}
+
+{% liquid
+  assign image_alt = ''
+  if image != blank
+    assign image_alt = image.alt | default: ''
+    if alt != nil
+      assign image_alt = alt
+    endif
+  endif
+
+  assign image_width = width | default: 1600
+  if image != blank
+    assign image_width = width | default: image.width
+  endif
+  assign image_widths = widths | default: '320, 480, 640, 800, 1200, 1600'
+  assign image_sizes = sizes | default: '100vw'
+  assign image_loading = loading | default: 'lazy'
+%}
+
+{% if image != blank %}
+  {% if fetchpriority == 'high' %}
+    {{
+      image
+      | image_url: width: image_width
+      | image_tag:
+        alt: image_alt,
+        class: class,
+        loading: image_loading,
+        fetchpriority: 'high',
+        widths: image_widths,
+        sizes: image_sizes
+    }}
+  {% else %}
+    {{
+      image
+      | image_url: width: image_width
+      | image_tag:
+        alt: image_alt,
+        class: class,
+        loading: image_loading,
+        widths: image_widths,
+        sizes: image_sizes
+    }}
+  {% endif %}
+{% endif %}

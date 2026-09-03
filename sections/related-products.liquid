@@ -1,0 +1,74 @@
+{% liquid
+  assign related_collection = section.settings.default_collection
+  assign wedding_collection = section.settings.wedding_collection
+  assign collection_eyebrow = 'collections.eyebrow' | t
+
+  if wedding_collection != blank
+    for assigned_collection in product.collections
+      if assigned_collection.id == wedding_collection.id
+        assign related_collection = wedding_collection
+        break
+      endif
+    endfor
+  endif
+
+  assign related_collection_url = related_collection.url
+  assign related_collection_title = related_collection.title
+  if related_collection.handle == 'the-collection'
+    assign related_collection_url = routes.all_products_collection_url
+    assign related_collection_title = 'collections.title' | t
+  endif
+%}
+
+{% if related_collection != blank and related_collection.products_count > 1 %}
+  <section class="coco-related-products coco-section" aria-labelledby="RelatedProductsTitle-{{ section.id }}">
+    <div class="coco-related-products__heading coco-content">
+      <p class="coco-eyebrow">{{ collection_eyebrow | escape }}</p>
+      <h2 id="RelatedProductsTitle-{{ section.id }}" class="coco-display">
+        {{ 'collections.more_from' | t: title: related_collection_title | escape }}
+      </h2>
+      {% render 'rose-heading-ornament' %}
+    </div>
+
+    <div class="coco-related-products__grid coco-content">
+      {% assign related_product_count = 0 %}
+      {% for related_product in related_collection.products %}
+        {% unless related_product.id == product.id %}
+          {% render 'product-card', product: related_product %}
+          {% assign related_product_count = related_product_count | plus: 1 %}
+          {% if related_product_count == section.settings.products_to_show %}
+            {% break %}
+          {% endif %}
+        {% endunless %}
+      {% endfor %}
+    </div>
+
+    <p class="coco-related-products__cta">
+      <a class="coco-button--secondary" href="{{ related_collection_url }}">
+        {{ 'collections.view_all' | t: title: related_collection_title | escape }}
+      </a>
+    </p>
+  </section>
+{% endif %}
+
+{% stylesheet %}
+  .coco-related-products { border-top: 1px solid var(--cr-divider); }
+  .coco-related-products__heading { max-width: 46rem; margin-bottom: 3rem; text-align: center; }
+  .coco-related-products__heading .coco-eyebrow { margin: 0 0 0.75rem; }
+  .coco-related-products__heading .coco-display { font-size: clamp(1.875rem, 3vw, 2.75rem); }
+  .coco-related-products__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2.25rem; }
+  .coco-related-products__cta { margin-top: 3rem; text-align: center; }
+  @media (max-width: 900px) { .coco-related-products__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 1.25rem; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Related products",
+  "settings": [
+    { "type": "collection", "id": "wedding_collection", "label": "Wedding dresses collection" },
+    { "type": "collection", "id": "default_collection", "label": "Default collection" },
+    { "type": "range", "id": "products_to_show", "label": "Products to show", "min": 2, "max": 8, "step": 1, "default": 4 }
+  ],
+  "enabled_on": { "templates": ["product"] }
+}
+{% endschema %}

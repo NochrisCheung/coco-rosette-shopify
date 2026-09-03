@@ -1,40 +1,28 @@
 <!doctype html>
 <html lang="{{ request.locale.iso_code }}">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400;1,500&family=Jost:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
-    {% # Inlined CSS Variables %}
-    {% render 'css-variables' %}
-
-    {% comment %}
-      Font preloading:
-      1. Preconnect to font CDN for faster connection
-      2. Preload only the critical font variant (base weight)
-      3. Additional variants load on-demand via @font-face
-    {% endcomment %}
-    {% unless settings.type_primary_font.system? %}
-      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-
-      {% comment %} Preload the base font variant for initial page render {% endcomment %}
-      {{ settings.type_primary_font | font_url | preload_tag: as: 'font', crossorigin: 'anonymous' }}
-    {% endunless %}
-
-    {% # Load and preload the critical CSS %}
-    {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
-
-    {% # Social, title, etc. %}
     {% render 'meta-tags' %}
+
+    {{ 'didot-lt-pro-roman.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2' }}
+    {{ 'bickham-script-pro-regular.ttf' | asset_url | preload_tag: as: 'font', type: 'font/ttf' }}
+    {{ 'fonts.css' | asset_url | stylesheet_tag }}
+    {{ 'theme.css' | asset_url | stylesheet_tag: preload: true }}
 
     {{ content_for_header }}
   </head>
 
-  <body class="coco-rosette">
-    {% sections 'header-group' %}
+  <body class="coco-rosette template-{{ request.page_type | handleize }}">
+    <a class="coco-skip-link" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
 
-    {{ content_for_layout }}
+    {% sections 'header-group' %}
+    {% section 'cart-drawer' %}
+
+    <main id="MainContent" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
 
     {% sections 'footer-group' %}
+    <div class="coco-live-region" aria-live="polite" data-live-region></div>
+    <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
   </body>
 </html>
