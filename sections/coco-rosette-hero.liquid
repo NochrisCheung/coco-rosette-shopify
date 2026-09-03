@@ -1,0 +1,57 @@
+{% liquid
+  assign cta_url = section.settings.cta_link | default: routes.all_products_collection_url
+%}
+
+<section class="coco-hero" aria-labelledby="coco-hero-title">
+  <div class="coco-hero__copy coco-fade-up">
+    <h1 id="coco-hero-title" class="coco-hero__title">Because it's their day too — luxury couture for dogs</h1>
+    {% if section.settings.headline_image != blank %}
+      {{ section.settings.headline_image | image_url: width: 1430 | image_tag: alt: "Because it's their day too — luxury couture for dogs", widths: '480, 715, 1000, 1430', class: 'coco-hero__headline-image' }}
+    {% else %}
+      <img src="{{ 'headline.png' | asset_url }}" width="715" height="410" alt="Because it's their day too — luxury couture for dogs" class="coco-hero__headline-image">
+    {% endif %}
+    <a class="coco-button" href="{{ cta_url }}">{{ section.settings.cta_label | escape }}</a>
+  </div>
+
+  <div class="coco-hero__visual coco-fade-up">
+    {% if section.settings.hero_image != blank %}
+      {{ section.settings.hero_image | image_url: width: 1600 | image_tag: alt: section.settings.hero_alt, widths: '600, 900, 1200, 1600', class: 'coco-hero__visual-image' }}
+    {% else %}
+      <img src="{{ 'hero-visual.png' | asset_url }}" width="1178" height="1097" alt="A Coco Rosette floral couture gown" class="coco-hero__visual-image">
+    {% endif %}
+  </div>
+
+  <img src="{{ 'sprig.png' | asset_url }}" width="120" height="150" alt="" class="coco-hero__sprig" loading="lazy">
+</section>
+
+{% stylesheet %}
+  .coco-hero { align-items: center; display: grid; gap: 40px; grid-template-columns: 5fr 6fr; min-height: min(720px, calc(100vh - 100px)); padding: 34px 56px 80px; position: relative; }
+  .coco-hero__copy { max-width: 560px; padding-left: 24px; }
+  .coco-hero__title { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0 0 0 0); white-space: nowrap; }
+  .coco-hero__headline-image { display: block; height: auto; max-width: 100%; width: 100%; }
+  .coco-button { background: var(--cr-rose-btn); color: #fff; display: inline-block; font-family: var(--cr-sans); font-size: 11px; font-weight: 400; letter-spacing: .28em; margin-top: 40px; padding: 14px 36px; text-decoration: none; text-transform: uppercase; transition: background .3s ease; }
+  .coco-button:hover { background: var(--cr-rose-btn-hover); }
+  .coco-hero__visual { justify-self: end; max-width: 672px; width: 100%; }
+  .coco-hero__visual-image { display: block; height: auto; width: 100%; }
+  .coco-hero__sprig { bottom: 40px; display: block; height: auto; left: 56px; position: absolute; width: 96px; }
+  .coco-fade-up { animation: coco-fade-up .9s ease both; }
+  .coco-hero__visual.coco-fade-up { animation-delay: .15s; }
+  @keyframes coco-fade-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .coco-fade-up { animation: none; } }
+  @media (max-width: 900px) { .coco-hero { gap: 24px; padding: 28px 32px 76px; } .coco-hero__copy { padding-left: 0; } .coco-hero__sprig { bottom: 26px; left: 32px; width: 72px; } }
+  @media (max-width: 700px) { .coco-hero { grid-template-columns: 1fr; min-height: auto; padding-top: 22px; } .coco-hero__copy { max-width: 460px; } .coco-hero__visual { justify-self: center; max-width: 560px; } .coco-button { margin-top: 28px; } .coco-hero__sprig { display: none; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Coco Rosette hero",
+  "settings": [
+    { "type": "image_picker", "id": "headline_image", "label": "Headline composition" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero composition" },
+    { "type": "text", "id": "hero_alt", "label": "Hero image description", "default": "A Coco Rosette floral couture gown" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Shop Couture" },
+    { "type": "url", "id": "cta_link", "label": "Button link" }
+  ],
+  "presets": [{ "name": "Coco Rosette hero" }]
+}
+{% endschema %}

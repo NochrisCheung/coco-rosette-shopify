@@ -1,0 +1,53 @@
+<footer class="coco-footer">
+  <div class="coco-footer__main">
+    <a class="coco-footer__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | default: 'Coco Rosette' | escape }} home">
+      {% if section.settings.logo != blank %}
+        {{ section.settings.logo | image_url: width: 600 | image_tag: alt: 'Coco Rosette', class: 'coco-footer__logo-image' }}
+      {% else %}
+        <img src="{{ 'logo.svg' | asset_url }}" width="575" height="55" alt="Coco Rosette" class="coco-footer__logo-image">
+      {% endif %}
+    </a>
+
+    <nav class="coco-footer__nav" aria-label="Footer navigation">
+      {% if section.settings.menu != blank and section.settings.menu.links.size > 0 %}
+        {% for link in section.settings.menu.links %}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {% endfor %}
+      {% else %}
+        <a href="#collection">Shop</a>
+        <a href="#collection">Collections</a>
+        <a href="#story">About</a>
+        <a href="mailto:{{ shop.email }}">Contact</a>
+      {% endif %}
+    </nav>
+  </div>
+  <p class="coco-footer__copyright">© {{ 'now' | date: '%Y' }} COCO ROSETTE — BECAUSE IT'S THEIR DAY TOO</p>
+</footer>
+
+{% stylesheet %}
+  .coco-footer { border-top: 1px solid var(--cr-divider); margin: 0 56px; padding: 64px 0 36px; }
+  .coco-footer__main { align-items: center; display: flex; gap: 32px; justify-content: space-between; }
+  .coco-footer__logo { display: block; }
+  .coco-footer__logo-image { display: block; height: auto; width: 180px; }
+  .coco-footer__nav { display: flex; flex-wrap: wrap; gap: 28px; justify-content: flex-end; }
+  .coco-footer a,
+  .coco-footer__copyright { color: var(--cr-gray); font-family: var(--cr-sans); font-size: 10px; font-weight: 300; letter-spacing: .28em; text-decoration: none; text-transform: uppercase; }
+  .coco-footer a:hover { color: var(--cr-ink); }
+  .coco-footer__copyright { margin-top: 40px; text-align: center; }
+  @media (max-width: 760px) {
+    .coco-footer { margin: 0 32px; padding: 48px 0 28px; }
+    .coco-footer__main { align-items: center; flex-direction: column; }
+    .coco-footer__nav { justify-content: center; row-gap: 16px; }
+    .coco-footer__copyright { font-size: 9px; line-height: 1.8; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Coco Rosette footer",
+  "settings": [
+    { "type": "image_picker", "id": "logo", "label": "Logo override" },
+    { "type": "link_list", "id": "menu", "label": "Menu" }
+  ]
+}
+{% endschema %}

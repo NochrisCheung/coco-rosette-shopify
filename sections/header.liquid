@@ -1,0 +1,77 @@
+<header class="coco-header">
+  <a class="coco-header__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | default: 'Coco Rosette' | escape }} home">
+    {% if section.settings.logo != blank %}
+      {{ section.settings.logo | image_url: width: 800 | image_tag: alt: 'Coco Rosette', widths: '240, 400, 800', class: 'coco-header__logo-image' }}
+    {% else %}
+      <img src="{{ 'logo.svg' | asset_url }}" width="575" height="55" alt="Coco Rosette" class="coco-header__logo-image">
+    {% endif %}
+  </a>
+
+  <nav class="coco-header__nav" aria-label="Main navigation">
+    {% if section.settings.menu != blank and section.settings.menu.links.size > 0 %}
+      {% for link in section.settings.menu.links %}
+        <a href="{{ link.url }}">{{ link.title }}</a>
+      {% endfor %}
+    {% else %}
+      <a href="#collection">Shop</a>
+      <a href="#collection">Collections</a>
+      <a href="#story">About</a>
+    {% endif %}
+  </nav>
+
+  <a class="coco-header__cart" href="{{ routes.cart_url }}">
+    Bag{% if cart.item_count > 0 %}<span aria-hidden="true"> ({{ cart.item_count }})</span>{% endif %}
+    <span class="visually-hidden">, {{ cart.item_count }} items</span>
+  </a>
+</header>
+
+{% stylesheet %}
+  .coco-header {
+    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(130px, 1fr) auto minmax(130px, 1fr);
+    min-height: 100px;
+    padding: 28px 56px 10px;
+  }
+  .coco-header__logo { display: block; width: fit-content; }
+  .coco-header__logo-image { display: block; height: auto; width: min(250px, 100%); }
+  .coco-header__nav { align-items: center; display: flex; gap: clamp(24px, 3.5vw, 52px); justify-content: center; }
+  .coco-header__nav a,
+  .coco-header__cart {
+    color: var(--cr-gray);
+    font-family: var(--cr-sans);
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: .3em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color .2s ease;
+  }
+  .coco-header__nav a:hover,
+  .coco-header__cart:hover { color: var(--cr-ink); }
+  .coco-header__cart { justify-self: end; letter-spacing: .24em; }
+  .visually-hidden {
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  @media (max-width: 760px) {
+    .coco-header { grid-template-columns: 1fr auto; min-height: 82px; padding: 24px 32px 8px; }
+    .coco-header__logo-image { width: min(210px, 100%); }
+    .coco-header__nav { display: none; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Coco Rosette header",
+  "settings": [
+    { "type": "image_picker", "id": "logo", "label": "Logo override" },
+    { "type": "link_list", "id": "menu", "label": "Menu" }
+  ]
+}
+{% endschema %}

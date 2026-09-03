@@ -1,0 +1,26 @@
+<section id="story" class="coco-story" aria-labelledby="coco-story-title">
+  <img src="{{ 'sprig.png' | asset_url }}" width="120" height="150" alt="" class="coco-story__sprig" loading="lazy">
+  <h2 id="coco-story-title" class="coco-story__title">The Coco Rosette story</h2>
+  <blockquote>{{ section.settings.quote | escape }}</blockquote>
+  <p>{{ section.settings.signature | escape }}</p>
+</section>
+
+{% stylesheet %}
+  .coco-story { padding: 88px 32px 112px; text-align: center; }
+  .coco-story__title { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0 0 0 0); white-space: nowrap; }
+  .coco-story__sprig { display: block; height: auto; margin: 0 auto 30px; width: 56px; }
+  .coco-story blockquote { font-family: var(--cr-script); font-size: clamp(30px, 3.3vw, 44px); font-style: italic; font-weight: 500; line-height: 1.38; margin: 0 auto; max-width: 850px; }
+  .coco-story p { color: var(--cr-gray); font-family: var(--cr-sans); font-size: 11px; font-weight: 300; letter-spacing: .32em; margin-top: 30px; text-transform: uppercase; }
+  @media (max-width: 700px) { .coco-story { padding: 64px 32px 80px; } .coco-story p { font-size: 10px; line-height: 1.8; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Coco Rosette story",
+  "settings": [
+    { "type": "textarea", "id": "quote", "label": "Quote", "default": "Every vow, every toast, every once-in-a-lifetime — they were there for all of ours. Now they're dressed for it." },
+    { "type": "text", "id": "signature", "label": "Signature", "default": "Maison Coco Rosette · Paris" }
+  ],
+  "presets": [{ "name": "Coco Rosette story" }]
+}
+{% endschema %}

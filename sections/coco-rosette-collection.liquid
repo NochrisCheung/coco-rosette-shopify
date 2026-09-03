@@ -1,0 +1,78 @@
+<section id="collection" class="coco-collection" aria-labelledby="coco-collection-title">
+  <div class="coco-collection__heading">
+    <p>{{ section.settings.eyebrow | escape }}</p>
+    <h2 id="coco-collection-title">{{ section.settings.heading_before | escape }} <em>{{ section.settings.heading_emphasis | escape }}</em></h2>
+    <span aria-hidden="true"></span>
+  </div>
+
+  <div class="coco-product-grid">
+    {% if section.settings.collection != blank and section.settings.collection.products_count > 0 %}
+      {% for product in section.settings.collection.products limit: section.settings.products_to_show %}
+        <a class="coco-product-card" href="{{ product.url }}">
+          <div class="coco-product-card__image">
+            {% if product.featured_image != blank %}
+              {{ product.featured_image | image_url: width: 900 | image_tag: alt: product.title, widths: '320, 450, 600, 900', loading: 'lazy' }}
+            {% endif %}
+          </div>
+          <div class="coco-product-card__details">
+            {% if product.type != blank %}<p>{{ product.type }}</p>{% endif %}
+            <h3>{{ product.title }}</h3>
+            <span>{{ product.price | money }}</span>
+          </div>
+        </a>
+      {% endfor %}
+    {% else %}
+      {% assign fallback_names = 'The Bridal Veil|Rosette Bloom Gown|Champagne Soirée|Jardin Rouge' | split: '|' %}
+      {% assign fallback_tags = 'Wedding|Ceremony|Evening|Garden Party' | split: '|' %}
+      {% assign fallback_prices = '€189|€156|€142|€168' | split: '|' %}
+      {% for name in fallback_names %}
+        {% assign position = forloop.index %}
+        <a class="coco-product-card" href="{{ routes.all_products_collection_url }}">
+          <div class="coco-product-card__image">
+            <img src="{{ 'product-' | append: position | append: '.jpg' | asset_url }}" width="1000" height="1500" alt="{{ name | escape }}" loading="lazy">
+          </div>
+          <div class="coco-product-card__details">
+            <p>{{ fallback_tags[forloop.index0] }}</p>
+            <h3>{{ name }}</h3>
+            <span>{{ fallback_prices[forloop.index0] }}</span>
+          </div>
+        </a>
+      {% endfor %}
+    {% endif %}
+  </div>
+</section>
+
+{% stylesheet %}
+  .coco-collection { padding: 80px 56px 112px; }
+  .coco-collection__heading { margin: 0 auto 64px; max-width: 760px; text-align: center; }
+  .coco-collection__heading p,
+  .coco-product-card__details p { color: var(--cr-gray); font-family: var(--cr-sans); font-size: 11px; font-weight: 300; letter-spacing: .32em; margin: 0 0 16px; text-transform: uppercase; }
+  .coco-collection__heading h2 { color: var(--cr-ink); font-family: var(--cr-serif); font-size: clamp(34px, 4vw, 54px); font-weight: 500; line-height: 1.2; }
+  .coco-collection__heading h2 em { font-family: var(--cr-script); font-weight: 500; }
+  .coco-collection__heading span { background: var(--cr-rose); display: block; height: 1px; margin: 26px auto 0; width: 56px; }
+  .coco-product-grid { display: grid; gap: 36px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 auto; max-width: 1152px; }
+  .coco-product-card { color: var(--cr-ink); display: block; min-width: 0; text-decoration: none; }
+  .coco-product-card__image { aspect-ratio: 2 / 3; border: 1px solid var(--cr-rose); border-radius: 999px 999px 0 0; overflow: hidden; }
+  .coco-product-card__image img { display: block; height: 100%; object-fit: cover; transition: transform .7s ease; width: 100%; }
+  .coco-product-card:hover .coco-product-card__image img { transform: scale(1.05); }
+  .coco-product-card__details { padding-top: 20px; text-align: center; }
+  .coco-product-card__details p { font-size: 10px; margin-bottom: 8px; }
+  .coco-product-card__details h3 { font-family: var(--cr-serif); font-size: clamp(17px, 1.6vw, 20px); font-weight: 500; line-height: 1.3; }
+  .coco-product-card__details span { color: var(--cr-gray); display: block; font-family: var(--cr-sans); font-size: 14px; margin-top: 6px; }
+  @media (max-width: 900px) { .coco-collection { padding: 72px 32px 92px; } .coco-product-grid { gap: 28px 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 480px) { .coco-collection { padding-top: 60px; } .coco-collection__heading { margin-bottom: 44px; } .coco-product-grid { gap: 28px 14px; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Coco Rosette collection",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "range", "id": "products_to_show", "label": "Products to show", "min": 2, "max": 8, "step": 1, "default": 4 },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Collection" },
+    { "type": "text", "id": "heading_before", "label": "Heading before emphasis", "default": "Dressed for the" },
+    { "type": "text", "id": "heading_emphasis", "label": "Heading emphasis", "default": "Occasion" }
+  ],
+  "presets": [{ "name": "Coco Rosette collection" }]
+}
+{% endschema %}
