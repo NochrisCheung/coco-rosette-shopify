@@ -6,7 +6,44 @@
   @param {product_option_value} option_value - The Shopify option value to render.
 {% enddoc %}
 
-{% assign input_id = product_form_id | append: '-Option-' | append: option.position | append: '-' | append: option_value.id %}
+{% liquid
+  assign input_id = product_form_id | append: '-Option-' | append: option.position | append: '-' | append: option_value.id
+  assign is_colour_option = false
+  assign swatch_colour = blank
+  assign swatch_image_url = blank
+
+  if option.name == 'Colour'
+    assign is_colour_option = true
+
+    if option_value.swatch.image != blank
+      assign swatch_image_url = option_value.swatch.image | image_url: width: 80
+    elsif option_value.swatch.color != blank
+      assign swatch_colour = 'rgb(' | append: option_value.swatch.color.rgb | append: ')'
+    else
+      assign option_value_handle = option_value.name | handleize
+      case option_value_handle
+        when 'black'
+          assign swatch_colour = '#1d1515'
+        when 'blue', 'pale-blue'
+          assign swatch_colour = '#b9cfdf'
+        when 'cream', 'creamy-white', 'ivory', 'white'
+          assign swatch_colour = '#f7f0e6'
+        when 'green'
+          assign swatch_colour = '#98b78d'
+        when 'lavender'
+          assign swatch_colour = '#b7a7d0'
+        when 'orange'
+          assign swatch_colour = '#e8a25d'
+        when 'pink'
+          assign swatch_colour = '#e6aac2'
+        when 'red'
+          assign swatch_colour = '#9e2b40'
+        when 'yellow'
+          assign swatch_colour = '#dfbb45'
+      endcase
+    endif
+  endif
+%}
 <input
   id="{{ input_id }}"
   class="coco-product__option-input"
@@ -19,4 +56,17 @@
   {% if option_value.selected %}checked{% endif %}
   {% unless option_value.available %}disabled{% endunless %}
 >
-<label class="coco-product__option-label" for="{{ input_id }}"{% if option.name == 'Size' and option_value.name == 'Custom size' %} data-custom-size-option-label{% endif %}>{{ option_value.name | escape }}</label>
+<label
+  class="coco-product__option-label{% if is_colour_option %} coco-product__option-label--colour{% endif %}"
+  for="{{ input_id }}"
+  {% if option.name == 'Size' and option_value.name == 'Custom size' %}data-custom-size-option-label{% endif %}
+>
+  {% if is_colour_option %}
+    <span
+      class="coco-product__option-swatch"
+      aria-hidden="true"
+      {% if swatch_image_url != blank %}style="--coco-product-option-swatch-image: url('{{ swatch_image_url | escape }}')"{% elsif swatch_colour != blank %}style="--coco-product-option-swatch-colour: {{ swatch_colour | escape }}"{% endif %}
+    ></span>
+  {% endif %}
+  <span>{{ option_value.name | escape }}</span>
+</label>

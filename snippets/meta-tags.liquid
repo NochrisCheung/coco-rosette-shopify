@@ -78,6 +78,44 @@
   >
 {%- endif -%}
 
+{%- unless request.page_type == 'password' or request.page_type == '404' or request.page_type == 'search' -%}
+  {%- liquid
+    assign organisation_id = request.origin | append: '/#organization'
+    assign website_id = request.origin | append: '/#website'
+    assign organisation_logo_url = 'coco-rosette-wordmark.png' | asset_url | prepend: 'https:'
+  -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": {{ organisation_id | json }},
+          "name": {{ shop.name | json }},
+          "url": {{ request.origin | json }},
+          "logo": {{ organisation_logo_url | json }},
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "email": "contact@cocorosette.com",
+            "availableLanguage": {{ request.locale.iso_code | json }}
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": {{ website_id | json }},
+          "name": {{ shop.name | json }},
+          "url": {{ request.origin | json }},
+          "publisher": {
+            "@id": {{ organisation_id | json }}
+          },
+          "inLanguage": {{ request.locale.iso_code | json }}
+        }
+      ]
+    }
+  </script>
+{%- endunless -%}
+
 <meta
   name="twitter:card"
   content="summary_large_image"
@@ -108,9 +146,29 @@
 >
 
 {% if settings.favicon != blank %}
-  <link rel="icon" href="{{ settings.favicon | image_url: width: 48 }}">
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="192x192"
+    href="{{ settings.favicon | image_url: width: 192 }}"
+  >
+  <link
+    rel="apple-touch-icon"
+    sizes="180x180"
+    href="{{ settings.favicon | image_url: width: 180 }}"
+  >
 {% else %}
-  <link rel="icon" href="{{ 'coco-rosette-rose-mark.png' | asset_url }}" type="image/png">
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="192x192"
+    href="{{ 'coco-rosette-favicon.png' | asset_url }}"
+  >
+  <link
+    rel="apple-touch-icon"
+    sizes="180x180"
+    href="{{ 'coco-rosette-favicon.png' | asset_url }}"
+  >
 {% endif %}
 
 {% if seo_description %}

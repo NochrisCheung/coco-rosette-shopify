@@ -13,6 +13,7 @@
 
 {% liquid
   assign current_sort = results.sort_by | default: results.default_sort_by
+  assign supported_sort_values = 'title-ascending,title-descending,price-ascending,price-descending' | split: ','
   assign has_active_filters = false
   assign has_open_filter = false
   for filter in results.filters
@@ -144,13 +145,17 @@
     <div class="coco-facets__sort">
       <label class="coco-facets__label" for="SortBy-{{ form_id }}">{{ 'search.sort_by' | t }}</label>
       <span class="coco-facets__sort-select">
-        <select id="SortBy-{{ form_id }}" class="coco-field" name="sort_by">
+        <select id="SortBy-{{ form_id }}" class="coco-field" name="sort_by" data-facets-sort>
           {% for option in results.sort_options %}
-            <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected="selected"{% endif %}>{{ option.name | escape }}</option>
+            {% if supported_sort_values contains option.value %}
+              <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected="selected"{% endif %}>{{ option.name | escape }}</option>
+            {% endif %}
           {% endfor %}
         </select>
       </span>
     </div>
+
+    <noscript><button class="coco-text-link" type="submit">{{ 'search.apply_filters' | t }}</button></noscript>
 
     {% if results.filters.size > 0 %}
       <div class="coco-facets__actions">

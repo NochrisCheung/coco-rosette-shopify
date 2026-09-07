@@ -6,6 +6,7 @@
   data-item-added="{{ 'cart.item_added' | t | escape }}"
   data-item-removed="{{ 'cart.item_removed' | t | escape }}"
   data-updated="{{ 'cart.updated' | t | escape }}"
+  data-cart-item-count="{{ cart.item_count }}"
 >
   <dialog id="CartDrawer" class="coco-cart-drawer" aria-labelledby="CartDrawerTitle" data-cart-drawer>
     <div class="coco-cart-drawer__panel">
@@ -78,7 +79,7 @@
                       <input id="CartDrawerQuantity-{{ item.key }}" type="number" name="quantity" value="{{ item.quantity }}" min="0" inputmode="numeric">
                       <button type="button" data-quantity-button="increase" aria-label="{{ 'cart.increase_quantity' | t: product: item.product.title | escape }}">{% render 'icon', name: 'plus', class: 'coco-icon' %}</button>
                     </div>
-                    <button class="coco-text-link" type="submit">{{ 'cart.update' | t }}</button>
+                    <noscript><button class="coco-text-link" type="submit">{{ 'cart.update' | t }}</button></noscript>
                   </form>
 
                   <a class="coco-text-link" href="{{ item.url_to_remove }}" data-cart-remove="{{ item.key }}">{{ 'cart.remove' | t }}</a>
@@ -115,6 +116,12 @@
       <p class="coco-visually-hidden" aria-live="polite" data-cart-drawer-status></p>
     </div>
   </dialog>
+  <div class="coco-cart-notice" hidden data-cart-notice>
+    <p class="coco-cart-notice__message" role="status" aria-live="polite" data-cart-notice-message></p>
+    <button class="coco-icon-button coco-cart-notice__dismiss" type="button" aria-label="{{ 'accessibility.close' | t }}" data-cart-notice-dismiss>
+      {% render 'icon', name: 'close', class: 'coco-icon' %}
+    </button>
+  </div>
 </coco-cart-drawer>
 
 {% stylesheet %}
@@ -148,6 +155,12 @@
   .coco-cart-drawer__empty { flex: 1; margin: clamp(1.25rem, 4vw, 2.5rem); }
   .coco-cart-drawer__empty .coco-button { margin-top: 1.25rem; }
   .coco-cart-drawer__error { margin: 0; padding: 0.875rem clamp(1.25rem, 4vw, 2.5rem); border-top: 1px solid var(--cr-error); color: var(--cr-error); font-size: 0.8125rem; }
+  .coco-cart-notice { position: fixed; z-index: 40; top: 5.25rem; right: clamp(1rem, 3vw, 2.5rem); display: flex; align-items: center; gap: 0.75rem; width: min(calc(100% - 2rem), 19rem); border: 1px solid var(--cr-divider); border-top-color: var(--cr-rose); padding: 0.875rem 0.75rem 0.875rem 1rem; background: var(--cr-bg); box-shadow: 0 0.75rem 1.5rem rgba(29, 21, 21, 0.1); opacity: 0; pointer-events: none; transform: translateY(-0.5rem); transition: opacity 180ms ease, transform 180ms ease; }
+  .coco-cart-notice[data-visible='true'] { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .coco-cart-notice__message { flex: 1; margin: 0; font-size: 0.75rem; line-height: 1.4; }
+  .coco-cart-notice__dismiss { flex: 0 0 auto; }
+  .coco-cart-notice__dismiss .coco-icon { width: 1rem; height: 1rem; }
+  @media (max-width: 600px) { .coco-cart-notice { top: 4.5rem; right: 0.75rem; width: min(calc(100% - 1.5rem), 19rem); } }
 {% endstylesheet %}
 
 {% schema %}

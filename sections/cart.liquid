@@ -1,90 +1,99 @@
-<section class="coco-cart-page coco-content">
-  <header class="coco-cart-page__header">
-    <p class="coco-eyebrow">{{ 'cart.bag' | t }}</p>
-    <h1 class="coco-display">{{ 'cart.title' | t }}</h1>
-  </header>
+<coco-cart-page data-section-id="{{ section.id }}" data-update-error="{{ 'cart.update_error' | t | escape }}" data-item-removed="{{ 'cart.item_removed' | t | escape }}" data-updated="{{ 'cart.updated' | t | escape }}">
+  <section class="coco-cart-page coco-content">
+    <header class="coco-cart-page__header">
+      <p class="coco-eyebrow">{{ 'cart.bag' | t }}</p>
+      <h1 class="coco-display">{{ 'cart.title' | t }}</h1>
+    </header>
 
-  {% if cart.item_count > 0 %}
-    <form action="{{ routes.cart_url }}" method="post" class="coco-cart-page__form">
-      <ul class="coco-cart-page__items" role="list">
-        {% for item in cart.items %}
-          {% liquid
-            assign item_product_title = item.product.title | escape
-            assign item_image_alt = item.image.alt | default: item.product.title
-          %}
-          <li class="coco-cart-page__item">
-            <a class="coco-cart-page__image-link" href="{{ item.url }}">
-              {% if item.image != blank %}
-                {% render 'responsive-image',
-                  image: item.image,
-                  alt: item_image_alt,
-                  class: 'coco-cart-page__image',
-                  width: 480,
-                  widths: '240, 360, 480, 640',
-                  sizes: '(min-width: 700px) 180px, 112px',
-                  loading: 'lazy'
-                %}
-              {% endif %}
-            </a>
-            <div class="coco-cart-page__item-details">
-              <a class="coco-cart-page__product-title" href="{{ item.url }}">{{ item_product_title }}</a>
-              {% unless item.product.has_only_default_variant %}<p class="coco-cart-page__variant">{{ item.variant.title | escape }}</p>{% endunless %}
-              {% unless item.properties == empty %}
-                <ul class="coco-cart-page__properties" role="list">
-                  {% for property in item.properties %}
-                    {% assign property_first_character = property.first | slice: 0 %}
-                    {% if property.last != blank and property_first_character != '_' %}<li>{{ property.first | escape }}: {{ property.last | escape }}</li>{% endif %}
-                  {% endfor %}
-                </ul>
-              {% endunless %}
-              {% if item.line_level_discount_allocations.size > 0 %}
-                <ul class="coco-cart-page__discounts" role="list">
-                  {% for discount_allocation in item.line_level_discount_allocations %}
-                    <li>{{ discount_allocation.discount_application.title | escape }} −{{ discount_allocation.amount | money }}</li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-              <a class="coco-text-link" href="{{ item.url_to_remove }}">{{ 'cart.remove' | t }}</a>
-            </div>
-            <div class="coco-cart-page__item-actions">
-              <label class="coco-visually-hidden" for="CartQuantity-{{ item.key }}">{{ 'cart.quantity' | t: product: item.product.title | escape }}</label>
-              <input id="CartQuantity-{{ item.key }}" class="coco-field coco-cart-page__quantity" type="number" name="updates[{{ item.key }}]" value="{{ item.quantity }}" min="0" inputmode="numeric">
-              <p class="coco-cart-page__line-price">
-                {% if item.original_line_price > item.final_line_price %}<s>{{ item.original_line_price | money }}</s>{% endif %}
-                <span>{{ item.final_line_price | money }}</span>
-              </p>
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
+    {% if cart.item_count > 0 %}
+      <form action="{{ routes.cart_url }}" method="post" class="coco-cart-page__form" data-cart-page-form>
+        <ul class="coco-cart-page__items" role="list">
+          {% for item in cart.items %}
+            {% liquid
+              assign item_product_title = item.product.title | escape
+              assign item_image_alt = item.image.alt | default: item.product.title
+            %}
+            <li class="coco-cart-page__item">
+              <a class="coco-cart-page__image-link" href="{{ item.url }}">
+                {% if item.image != blank %}
+                  {% render 'responsive-image',
+                    image: item.image,
+                    alt: item_image_alt,
+                    class: 'coco-cart-page__image',
+                    width: 480,
+                    widths: '240, 360, 480, 640',
+                    sizes: '(min-width: 700px) 180px, 112px',
+                    loading: 'lazy'
+                  %}
+                {% endif %}
+              </a>
+              <div class="coco-cart-page__item-details">
+                <a class="coco-cart-page__product-title" href="{{ item.url }}">{{ item_product_title }}</a>
+                {% unless item.product.has_only_default_variant %}<p class="coco-cart-page__variant">{{ item.variant.title | escape }}</p>{% endunless %}
+                {% unless item.properties == empty %}
+                  <ul class="coco-cart-page__properties" role="list">
+                    {% for property in item.properties %}
+                      {% assign property_first_character = property.first | slice: 0 %}
+                      {% if property.last != blank and property_first_character != '_' %}<li>{{ property.first | escape }}: {{ property.last | escape }}</li>{% endif %}
+                    {% endfor %}
+                  </ul>
+                {% endunless %}
+                {% if item.line_level_discount_allocations.size > 0 %}
+                  <ul class="coco-cart-page__discounts" role="list">
+                    {% for discount_allocation in item.line_level_discount_allocations %}
+                      <li>{{ discount_allocation.discount_application.title | escape }} −{{ discount_allocation.amount | money }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+                <a class="coco-text-link" href="{{ item.url_to_remove }}" data-cart-page-remove="{{ item.key }}">{{ 'cart.remove' | t }}</a>
+              </div>
+              <div class="coco-cart-page__item-actions">
+                <label class="coco-visually-hidden" for="CartQuantity-{{ item.key }}">{{ 'cart.quantity' | t: product: item.product.title | escape }}</label>
+                <div class="coco-quantity-input">
+                  <button type="button" data-cart-page-quantity-button="decrease" aria-label="{{ 'cart.decrease_quantity' | t: product: item.product.title | escape }}">{% render 'icon', name: 'minus', class: 'coco-icon' %}</button>
+                  <input id="CartQuantity-{{ item.key }}" class="coco-cart-page__quantity" type="number" name="updates[{{ item.key }}]" value="{{ item.quantity }}" min="0" inputmode="numeric" data-cart-page-quantity data-cart-line-key="{{ item.key }}">
+                  <button type="button" data-cart-page-quantity-button="increase" aria-label="{{ 'cart.increase_quantity' | t: product: item.product.title | escape }}">{% render 'icon', name: 'plus', class: 'coco-icon' %}</button>
+                </div>
+                <p class="coco-cart-page__line-price">
+                  {% if item.original_line_price > item.final_line_price %}<s>{{ item.original_line_price | money }}</s>{% endif %}
+                  <span>{{ item.final_line_price | money }}</span>
+                </p>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
 
-      <footer class="coco-cart-page__footer">
-        {% if cart.cart_level_discount_applications.size > 0 %}
-          <ul class="coco-cart-page__discounts" role="list">
-            {% for discount_application in cart.cart_level_discount_applications %}
-              <li>{{ discount_application.title | escape }} −{{ discount_application.total_allocated_amount | money }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-        <p class="coco-cart-page__subtotal"><span>{{ 'cart.subtotal' | t }}</span><strong>{{ cart.total_price | money }}</strong></p>
-        <p class="coco-cart-page__delivery-promise">{{ 'products.delivery_promise' | t }}</p>
-        <div class="coco-cart-page__buttons">
-          <button class="coco-button--secondary" type="submit" name="update">{{ 'cart.update' | t }}</button>
-          <button class="coco-button" type="submit" name="checkout">{{ 'cart.checkout' | t }}</button>
+        <footer class="coco-cart-page__footer">
+          {% if cart.cart_level_discount_applications.size > 0 %}
+            <ul class="coco-cart-page__discounts" role="list">
+              {% for discount_application in cart.cart_level_discount_applications %}
+                <li>{{ discount_application.title | escape }} −{{ discount_application.total_allocated_amount | money }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          <p class="coco-cart-page__subtotal"><span>{{ 'cart.subtotal' | t }}</span><strong>{{ cart.total_price | money }}</strong></p>
+          <p class="coco-cart-page__delivery-promise">{{ 'products.delivery_promise' | t }}</p>
+          <div class="coco-cart-page__buttons">
+            <noscript><button class="coco-button--secondary" type="submit" name="update">{{ 'cart.update' | t }}</button></noscript>
+            <button class="coco-button" type="submit" name="checkout" data-cart-page-checkout>{{ 'cart.checkout' | t }}</button>
+          </div>
+        </footer>
+      </form>
+    {% else %}
+      <div class="coco-empty-state">
+        <div>
+          <p>{{ 'cart.empty' | t }}</p>
+          <a class="coco-button" href="{{ routes.all_products_collection_url }}">{{ 'cart.continue_shopping' | t }}</a>
         </div>
-      </footer>
-    </form>
-  {% else %}
-    <div class="coco-empty-state">
-      <div>
-        <p>{{ 'cart.empty' | t }}</p>
-        <a class="coco-button" href="{{ routes.all_products_collection_url }}">{{ 'cart.continue_shopping' | t }}</a>
       </div>
-    </div>
-  {% endif %}
-</section>
+    {% endif %}
+    <p class="coco-cart-page__error" role="alert" hidden data-cart-page-error></p>
+    <p class="coco-visually-hidden" aria-live="polite" data-cart-page-status></p>
+  </section>
+</coco-cart-page>
 
 {% stylesheet %}
+  coco-cart-page { display: block; }
   .coco-cart-page { padding-block: var(--cr-section-space); }
   .coco-cart-page__header { margin-bottom: 2.5rem; text-align: center; }
   .coco-cart-page__header .coco-eyebrow { margin-bottom: 0.75rem; }
@@ -97,13 +106,20 @@
   .coco-cart-page__properties, .coco-cart-page__discounts { padding: 0; }
   .coco-cart-page__discounts { color: var(--cr-rose); }
   .coco-cart-page__item-actions { align-self: center; }
-  .coco-cart-page__quantity { max-width: 5rem; text-align: center; }
+  .coco-cart-page .coco-quantity-input { display: inline-grid; grid-template-columns: 2rem 2.5rem 2rem; align-items: center; border: 1px solid var(--cr-divider); }
+  .coco-cart-page .coco-quantity-input button { display: grid; width: 2rem; height: 2rem; place-items: center; border: 0; background: transparent; }
+  .coco-cart-page .coco-quantity-input .coco-icon { width: 1rem; height: 1rem; }
+  .coco-cart-page .coco-quantity-input input { width: 100%; border: 0; background: transparent; }
+  .coco-cart-page .coco-quantity-input input::-webkit-inner-spin-button, .coco-cart-page .coco-quantity-input input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+  .coco-cart-page__quantity { text-align: center; }
   .coco-cart-page__line-price { margin-top: 0.75rem; font-family: var(--cr-serif); font-size: 1.125rem; }
   .coco-cart-page__line-price span { margin-left: 0.35rem; }
   .coco-cart-page__footer { display: grid; width: min(100%, 28rem); gap: 1rem; margin: 2rem 0 0 auto; }
   .coco-cart-page__subtotal { display: flex; justify-content: space-between; font-family: var(--cr-serif); font-size: 1.35rem; }
   .coco-cart-page__delivery-promise { color: var(--cr-gray); font-size: 0.8125rem; }
   .coco-cart-page__buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .coco-cart-page__buttons > * { width: 100%; }
+  .coco-cart-page__error { width: min(100%, 28rem); margin: 1rem 0 0 auto; color: var(--cr-error); font-size: 0.8125rem; }
   @media (max-width: 650px) { .coco-cart-page__item { grid-template-columns: 7rem minmax(0, 1fr); } .coco-cart-page__item-actions { grid-column: 2; } }
   @media (max-width: 420px) { .coco-cart-page__buttons { grid-template-columns: 1fr; } }
 {% endstylesheet %}

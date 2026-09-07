@@ -21,7 +21,10 @@
     },
     "story": {
       "type": "coco-rosette-story",
-      "settings": {}
+      "settings": {
+        "quote": "Made for the moments when happiness, warmth and quiet joy are shared with the dogs you love.",
+        "signature": "Coco Rosette · London"
+      }
     }
   },
   "order": [

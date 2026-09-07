@@ -64,4 +64,6 @@ The Etsy/Shopify SKU register is controlled outside this repository at `/Users/n
 
 `shopify theme push` is a remote write. Upload only reviewed files to the identified development or unpublished theme. Do not run `shopify theme publish`, modify the live theme, delete a remote theme, or change Shopify administration settings without explicit merchant approval for that exact action.
 
+For any authorised live repair, treat the Git-tracked theme source as the visual-code authority and Shopify Admin as the authority for merchant-managed configuration. Before upload, pull the named live theme to a temporary audit directory and compare the affected files with the approved local revision. Never upload a partial change from an older working tree. Keep `config/settings_data.json`, section-group JSON settings, menus, products, policies, and other Shopify-managed configuration out of a source-only repair unless the release explicitly includes them. After upload, pull the same theme again and verify the deployed file hashes and Liquid asset references. This catches a partial upload before it becomes a visible design regression.
+
 The current release boundary, theme IDs, known limitations, and outstanding merchant decisions are maintained in the master record at `../docs/implementation_plans/implementation_plan_2026-08-25_coco_rosette_storefront_v0.md`.

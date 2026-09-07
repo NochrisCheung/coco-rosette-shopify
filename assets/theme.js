@@ -8,6 +8,16 @@
     }
   };
 
+  const updateCartCount = (itemCount) => {
+    document.querySelectorAll('[data-cart-count]').forEach((count) => {
+      count.textContent = itemCount;
+    });
+
+    document.querySelectorAll('[data-cart-count-description]').forEach((description) => {
+      description.textContent = description.dataset.cartCountTemplate.replace('__count__', itemCount);
+    });
+  };
+
   class CocoCartError extends Error {
     constructor(message) {
       super(message);
@@ -18,22 +28,29 @@
   class CocoCartDrawer extends HTMLElement {
     connectedCallback() {
       this.opener = null;
+      this.noticeTimer = null;
       this.handleClick = this.handleClick.bind(this);
+      this.handleChange = this.handleChange.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
       document.addEventListener('click', this.handleClick);
+      document.addEventListener('change', this.handleChange);
       document.addEventListener('submit', this.handleSubmit);
       this.setDialog();
     }
 
     disconnectedCallback() {
       document.removeEventListener('click', this.handleClick);
+      document.removeEventListener('change', this.handleChange);
       document.removeEventListener('submit', this.handleSubmit);
+      window.clearTimeout(this.noticeTimer);
     }
 
     setDialog() {
       this.dialog = this.querySelector('[data-cart-drawer]');
       this.status = this.querySelector('[data-cart-drawer-status]');
       this.error = this.querySelector('[data-cart-drawer-error]');
+      this.notice = this.querySelector('[data-cart-notice]');
+      this.noticeMessage = this.querySelector('[data-cart-notice-message]');
 
       if (!this.dialog) return;
 
@@ -71,6 +88,22 @@
     setStatus(message) {
       if (this.status) this.status.textContent = message;
       announce(message);
+    }
+
+    showNotice(message) {
+      if (!this.notice || !this.noticeMessage) return;
+      window.clearTimeout(this.noticeTimer);
+      this.noticeMessage.textContent = message;
+      this.notice.hidden = false;
+      this.notice.dataset.visible = 'true';
+      this.noticeTimer = window.setTimeout(() => this.dismissNotice(), 5000);
+    }
+
+    dismissNotice() {
+      if (!this.notice) return;
+      window.clearTimeout(this.noticeTimer);
+      delete this.notice.dataset.visible;
+      this.notice.hidden = true;
     }
 
     clearError(form) {
@@ -113,13 +146,7 @@
     }
 
     updateCount(itemCount) {
-      document.querySelectorAll('[data-cart-count]').forEach((count) => {
-        count.textContent = itemCount;
-      });
-
-      document.querySelectorAll('[data-cart-count-description]').forEach((description) => {
-        description.textContent = description.dataset.cartCountTemplate.replace('__count__', itemCount);
-      });
+      updateCartCount(itemCount);
     }
 
     renderSection(sectionMarkup) {
@@ -129,6 +156,7 @@
 
       this.innerHTML = replacement.innerHTML;
       this.setDialog();
+      return Number.parseInt(replacement.dataset.cartItemCount, 10);
     }
 
     async updateCart(payload) {
@@ -174,17 +202,18 @@
       return data;
     }
 
-    async handleCartResult(request, form, successMessage, fallbackError) {
+    async handleCartResult(request, form, successMessage, fallbackError, { openOnSuccess = true, showNotice = false } = {}) {
       this.clearError(form);
       this.setLoading(form, true);
       try {
         const data = await request;
         const sectionMarkup = data.sections?.[this.sectionId];
         if (!sectionMarkup) throw new CocoCartError(this.messages.refreshError);
-        this.renderSection(sectionMarkup);
-        this.updateCount(data.item_count);
-        this.open();
+        const itemCount = this.renderSection(sectionMarkup);
+        this.updateCount(Number.isNaN(itemCount) ? data.item_count : itemCount);
+        if (openOnSuccess) this.open();
         this.setStatus(successMessage);
+        if (showNotice) this.showNotice(successMessage);
       } catch (error) {
         this.showError(form, error instanceof CocoCartError ? error.message : fallbackError);
       } finally {
@@ -193,6 +222,12 @@
     }
 
     handleClick(event) {
+      const noticeDismiss = event.target.closest('[data-cart-notice-dismiss]');
+      if (noticeDismiss && this.contains(noticeDismiss)) {
+        this.dismissNotice();
+        return;
+      }
+
       const cartTrigger = event.target.closest('[data-cart-drawer-trigger]');
       if (cartTrigger) {
         if (!this.dialog || !('showModal' in this.dialog)) return;
@@ -220,13 +255,19 @@
       form.requestSubmit();
     }
 
+    handleChange(event) {
+      const quantityInput = event.target.closest('[data-cart-change-form] [name="quantity"]');
+      if (!quantityInput || !this.contains(quantityInput)) return;
+      quantityInput.closest('[data-cart-change-form]')?.requestSubmit();
+    }
+
     handleSubmit(event) {
       const productForm = event.target.closest('[data-product-form]');
       if (productForm) {
         if (!this.dialog || !('showModal' in this.dialog)) return;
         if (event.submitter?.dataset.shopifyPaymentButton) return;
         event.preventDefault();
-        this.handleCartResult(this.addProduct(productForm), productForm, this.messages.itemAdded, this.messages.addError);
+        this.handleCartResult(this.addProduct(productForm), productForm, this.messages.itemAdded, this.messages.addError, { openOnSuccess: false, showNotice: true });
         return;
       }
 
@@ -237,6 +278,181 @@
       const formData = new FormData(cartChangeForm);
       const quantity = Number.parseInt(formData.get('quantity'), 10);
       this.handleCartResult(this.updateCart({ id: formData.get('id'), quantity: Number.isNaN(quantity) ? 0 : quantity }), cartChangeForm, this.messages.updated, this.messages.updateError);
+    }
+  }
+
+  class CocoCartPage extends HTMLElement {
+    connectedCallback() {
+      this.handleChange = this.handleChange.bind(this);
+      this.handleClick = this.handleClick.bind(this);
+      this.handleKeydown = this.handleKeydown.bind(this);
+      this.handleSubmit = this.handleSubmit.bind(this);
+      this.addEventListener('change', this.handleChange);
+      this.addEventListener('click', this.handleClick);
+      this.addEventListener('keydown', this.handleKeydown);
+      this.addEventListener('submit', this.handleSubmit);
+      this.setElements();
+    }
+
+    disconnectedCallback() {
+      this.removeEventListener('change', this.handleChange);
+      this.removeEventListener('click', this.handleClick);
+      this.removeEventListener('keydown', this.handleKeydown);
+      this.removeEventListener('submit', this.handleSubmit);
+    }
+
+    get sectionId() {
+      return this.dataset.sectionId;
+    }
+
+    get messages() {
+      return {
+        itemRemoved: this.dataset.itemRemoved,
+        updateError: this.dataset.updateError,
+        updated: this.dataset.updated
+      };
+    }
+
+    setElements() {
+      this.form = this.querySelector('[data-cart-page-form]');
+      this.error = this.querySelector('[data-cart-page-error]');
+      this.status = this.querySelector('[data-cart-page-status]');
+    }
+
+    setStatus(message) {
+      if (this.status) this.status.textContent = message;
+      announce(message);
+    }
+
+    clearError() {
+      if (!this.error) return;
+      this.error.hidden = true;
+      this.error.textContent = '';
+    }
+
+    showError(message) {
+      if (this.error) {
+        this.error.hidden = false;
+        this.error.textContent = message;
+      }
+      announce(message);
+    }
+
+    setLoading(isLoading) {
+      this.form?.querySelectorAll('button, input').forEach((control) => {
+        if (isLoading) {
+          control.dataset.wasDisabled = String(control.disabled);
+          control.disabled = true;
+          return;
+        }
+        control.disabled = control.dataset.wasDisabled === 'true';
+        delete control.dataset.wasDisabled;
+      });
+    }
+
+    renderSection(sectionMarkup) {
+      const parsedDocument = new DOMParser().parseFromString(sectionMarkup, 'text/html');
+      const replacement = parsedDocument.querySelector('coco-cart-page');
+      if (!replacement) throw new CocoCartError(this.messages.updateError);
+
+      this.innerHTML = replacement.innerHTML;
+      this.setElements();
+    }
+
+    async updateLine(id, quantity) {
+      const response = await fetch(`${rootUrl}cart/change.js`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id,
+          quantity,
+          sections: [this.sectionId],
+          sections_url: window.location.pathname
+        })
+      });
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        throw new CocoCartError(this.messages.updateError);
+      }
+      if (!response.ok) throw new CocoCartError(data.description || this.messages.updateError);
+      return data;
+    }
+
+    async handleCartUpdate(request, successMessage) {
+      this.clearError();
+      this.setLoading(true);
+      try {
+        const data = await request;
+        const sectionMarkup = data.sections?.[this.sectionId];
+        if (!sectionMarkup) throw new CocoCartError(this.messages.updateError);
+        this.renderSection(sectionMarkup);
+        updateCartCount(data.item_count);
+        this.setStatus(successMessage);
+      } catch (error) {
+        this.showError(error instanceof CocoCartError ? error.message : this.messages.updateError);
+      } finally {
+        this.setLoading(false);
+      }
+    }
+
+    handleChange(event) {
+      const quantityInput = event.target.closest('[data-cart-page-quantity]');
+      if (!quantityInput || !this.contains(quantityInput)) return;
+
+      const quantity = Number.parseInt(quantityInput.value, 10);
+      this.handleCartUpdate(
+        this.updateLine(quantityInput.dataset.cartLineKey, Number.isNaN(quantity) ? 0 : Math.max(0, quantity)),
+        this.messages.updated
+      );
+    }
+
+    handleKeydown(event) {
+      const quantityInput = event.target.closest('[data-cart-page-quantity]');
+      if (!quantityInput || !this.contains(quantityInput) || event.key !== 'Enter') return;
+
+      event.preventDefault();
+      quantityInput.blur();
+    }
+
+    handleClick(event) {
+      const removeLink = event.target.closest('[data-cart-page-remove]');
+      if (removeLink && this.contains(removeLink)) {
+        event.preventDefault();
+        this.handleCartUpdate(this.updateLine(removeLink.dataset.cartPageRemove, 0), this.messages.itemRemoved);
+        return;
+      }
+
+      const quantityButton = event.target.closest('[data-cart-page-quantity-button]');
+      if (!quantityButton || !this.contains(quantityButton)) return;
+
+      const quantityInput = quantityButton.closest('.coco-quantity-input')?.querySelector('[data-cart-page-quantity]');
+      if (!quantityInput) return;
+
+      const currentQuantity = Number.parseInt(quantityInput.value, 10) || 0;
+      const quantity = quantityButton.dataset.cartPageQuantityButton === 'increase'
+        ? currentQuantity + 1
+        : Math.max(0, currentQuantity - 1);
+      this.handleCartUpdate(this.updateLine(quantityInput.dataset.cartLineKey, quantity), quantity === 0 ? this.messages.itemRemoved : this.messages.updated);
+    }
+
+    handleSubmit(event) {
+      const form = event.target.closest('[data-cart-page-form]');
+      if (!form || !this.contains(form)) return;
+      if (event.submitter?.matches('[data-cart-page-checkout]')) return;
+
+      event.preventDefault();
+      const quantityInput = form.querySelector('[data-cart-page-quantity]');
+      if (!quantityInput) return;
+      const quantity = Number.parseInt(quantityInput.value, 10);
+      this.handleCartUpdate(
+        this.updateLine(quantityInput.dataset.cartLineKey, Number.isNaN(quantity) ? 0 : Math.max(0, quantity)),
+        this.messages.updated
+      );
     }
   }
 
@@ -497,8 +713,29 @@
     });
   };
 
+  const connectFacetSorting = () => {
+    document.querySelectorAll('[data-facets-sort]').forEach((sortSelect) => {
+      sortSelect.addEventListener('change', () => {
+        const form = sortSelect.closest('form');
+        if (!form) return;
+        form.requestSubmit();
+      });
+    });
+  };
+
+  const connectCookiePreferences = () => {
+    document.querySelectorAll('[data-cookie-preferences]').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        window.privacyBanner?.showPreferences();
+      });
+    });
+  };
+
   if (!customElements.get('coco-cart-drawer')) customElements.define('coco-cart-drawer', CocoCartDrawer);
+  if (!customElements.get('coco-cart-page')) customElements.define('coco-cart-page', CocoCartPage);
   if (!customElements.get('coco-product')) customElements.define('coco-product', CocoProduct);
   connectMobileNavigation();
   connectFacetDisclosures();
+  connectFacetSorting();
+  connectCookiePreferences();
 })();

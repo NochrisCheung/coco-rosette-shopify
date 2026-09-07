@@ -8,6 +8,7 @@
   "accessibility": {
     "close": "Close",
     "footer_navigation": "Footer pages",
+    "footer_social_navigation": "Coco Rosette social links",
     "legal_navigation": "Legal information",
     "home": "{{ shop_name }} home",
     "main_navigation": "Main navigation",
@@ -91,6 +92,7 @@
     "error_heading": "Please correct the following:"
   },
   "footer": {
+    "cookie_preferences": "Cookie preferences",
     "delivery_policy": "Delivery policy",
     "returns_and_refunds": "Returns & refunds",
     "privacy_policy": "Privacy policy",

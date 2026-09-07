@@ -271,7 +271,10 @@
   .coco-product__option-values { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.625rem; }
   .coco-product__option-input { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
   .coco-product__option-label { display: inline-flex; align-items: center; min-height: 2.5rem; border: 1px solid var(--cr-divider); padding: 0.5rem 0.875rem; cursor: pointer; font-size: 0.75rem; }
+  .coco-product__option-label--colour { gap: 0.5rem; }
+  .coco-product__option-swatch { width: 0.75rem; height: 0.75rem; flex: 0 0 0.75rem; border: 1px solid rgba(29, 21, 21, 0.22); border-radius: 50%; background-color: var(--coco-product-option-swatch-colour, var(--cr-placeholder-wash)); background-image: var(--coco-product-option-swatch-image, none); background-position: center; background-size: cover; }
   .coco-product__option-input:checked + .coco-product__option-label { border-color: var(--cr-ink); background: var(--cr-ink); color: var(--cr-white); }
+  .coco-product__option-input:checked + .coco-product__option-label--colour .coco-product__option-swatch { border-color: rgba(251, 251, 250, 0.72); }
   .coco-product__option-input:focus-visible + .coco-product__option-label { box-shadow: var(--cr-focus); }
   .coco-product__option-input:disabled + .coco-product__option-label { cursor: not-allowed; opacity: 0.4; text-decoration: line-through; }
   .coco-product__custom-size { margin: 1.25rem 0 0; border: 1px solid var(--cr-divider); padding: 1rem; }
