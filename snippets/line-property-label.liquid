@@ -1,0 +1,10 @@
+{% doc %}
+  Translates presentation only; fulfilment property keys remain unchanged.
+  @param {string} key - Stored line-item property key.
+{% enddoc %}
+{%- case key -%}
+  {%- when 'Chest (cm)' -%}{{- 'products.custom_size.chest' | t -}}
+  {%- when 'Body length (cm)' -%}{{- 'products.custom_size.body_length' | t -}}
+  {%- when 'Neck circumference (cm)' -%}{{- 'products.custom_size.neck_circumference' | t -}}
+  {%- else -%}{{- key | escape -}}
+{%- endcase -%}

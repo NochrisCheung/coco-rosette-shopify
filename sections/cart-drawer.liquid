@@ -52,7 +52,7 @@
                       {% for property in item.properties %}
                         {% assign property_first_character = property.first | slice: 0 %}
                         {% if property.last != blank and property_first_character != '_' %}
-                          <li>{{ property.first | escape }}: {{ property.last | escape }}</li>
+                          <li>{% render 'line-property-label', key: property.first %}: {{ property.last | escape }}</li>
                         {% endif %}
                       {% endfor %}
                     </ul>
@@ -157,6 +157,7 @@
   .coco-cart-drawer__error { margin: 0; padding: 0.875rem clamp(1.25rem, 4vw, 2.5rem); border-top: 1px solid var(--cr-error); color: var(--cr-error); font-size: 0.8125rem; }
   .coco-cart-notice { position: fixed; z-index: 40; top: 5.25rem; right: clamp(1rem, 3vw, 2.5rem); display: flex; align-items: center; gap: 0.75rem; width: min(calc(100% - 2rem), 19rem); border: 1px solid var(--cr-divider); border-top-color: var(--cr-rose); padding: 0.875rem 0.75rem 0.875rem 1rem; background: var(--cr-bg); box-shadow: 0 0.75rem 1.5rem rgba(29, 21, 21, 0.1); opacity: 0; pointer-events: none; transform: translateY(-0.5rem); transition: opacity 180ms ease, transform 180ms ease; }
   .coco-cart-notice[data-visible='true'] { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .coco-cart-notice[hidden] { display: none; }
   .coco-cart-notice__message { flex: 1; margin: 0; font-size: 0.75rem; line-height: 1.4; }
   .coco-cart-notice__dismiss { flex: 0 0 auto; }
   .coco-cart-notice__dismiss .coco-icon { width: 1rem; height: 1rem; }

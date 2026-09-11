@@ -11,12 +11,20 @@
   "sections": {
     "hero": {
       "type": "coco-rosette-hero",
-      "settings": {}
+      "settings": {
+        "heading_roman": "Because It’s",
+        "heading_italic": "Their Day Too",
+        "subtitle": "Luxury Couture for Dogs",
+        "cta_label": "Shop couture"
+      }
     },
     "collection": {
       "type": "coco-rosette-collection",
       "settings": {
-        "collection": "the-collection"
+        "collection": "the-collection",
+        "eyebrow": "The Collection",
+        "heading_before": "Dressed for the",
+        "heading_emphasis": "Occasion"
       }
     },
     "story": {

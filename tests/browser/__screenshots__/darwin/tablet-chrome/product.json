@@ -1,0 +1,21 @@
+{
+  "status": "MERCHANT_APPROVED",
+  "themeId": "197438931288",
+  "route": "/products/lucienne",
+  "imageHash": "da02a460c4e80677a1f0e553e74efd3302b16b4cc2af827edb0cebbdc58fafea",
+  "capturedAt": "2026-09-08T23:39:48.714Z",
+  "environment": {
+    "browser": "152.0.7977.83",
+    "platform": "darwin",
+    "viewport": {
+      "width": 768,
+      "height": 1024
+    },
+    "project": "tablet-chrome",
+    "locale": "en-GB",
+    "screenshotScale": "css"
+  },
+  "referencePath": "tests/browser/__screenshots__/darwin/tablet-chrome/product.png",
+  "reviewNote": "9 September 2026: merchant explicitly confirms all visuals are correct and instructs proceeding with currencies and launch, in response to the exact Chrome reference approval request. Further Safari checks waived.",
+  "approvedAt": "2026-09-08T23:46:10.105Z"
+}

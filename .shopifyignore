@@ -11,3 +11,16 @@
 #
 # Ignore templates and sections with a regular expression:
 #   /(templates|sections)/.*\.json/
+
+# Local regression checks are never theme delivery assets.
+tests/**
+scripts/**
+quality/**
+package.json
+package-lock.json
+playwright.config.cjs
+playwright.localisation.config.cjs
+test-results/**
+playwright-report/**
+.quality/**
+.github/**

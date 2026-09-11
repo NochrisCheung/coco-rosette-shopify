@@ -1,0 +1,22 @@
+{
+  "reviewedOn": "2026-09-07",
+  "source": "Approved PNG identity/botanical assets in docs/assets/asset_manifest.md; footer arrangement confirmed by merchant on 7 September. This is not approval of every current preview pixel.",
+  "assets": {
+    "assets/coco-rosette-favicon.png": "5a287cfeb7cc603deecdfc444d8ea8496e540e531603d2f3f64d4f28f5d7311f",
+    "assets/coco-rosette-heading-vine.png": "912d7417a979e0f0ababf8bcbeee5147a7098eb310b4f045a135b06f8a8893d2",
+    "assets/coco-rosette-hero-corner.png": "6b222923d7850460c2ee81b7ddd3f9872cd9c100a7acd5cdc68d72bff4884d7c",
+    "assets/coco-rosette-hero-left-sprig.png": "aac10438358d39cd8a566d40c807bf0623b7401f159eace45cd6c96fff42d465",
+    "assets/coco-rosette-story-vine.png": "46d4ea99085b733c0c1f76ae28526307a80544a63c9312a517cef085e504c488",
+    "assets/coco-rosette-wordmark.png": "ee27c462c752c410569777a4cfaef2b7e50773712a6e07c298f3d20478bc6a02",
+    "assets/didot-lt-pro-roman.woff2": "ee41d780d31f89973c11b4fe2c66c0567f480a836716ddfe6a7b4454448a94ee",
+    "assets/bickham-script-pro-regular.ttf": "6ae0959f21e3524102d682b47a3c2926fc6655fa4aad801a584d08ec0fedec7c",
+    "assets/jost-300-400-latin.woff2": "235d8f8964bfdf105fc0c3e4c77b5e70f31bee1dad611d59318b5f2a5cb64d90"
+  },
+  "colours": {
+    "--cr-bg": "#fbfbfa", "--cr-ink": "#252425", "--cr-rose": "#9e2b40",
+    "--cr-divider": "#e8e2da", "--cr-rose-blue": "#7a8db8", "--cr-rose-orange": "#d6925d"
+  },
+  "homeOrder": ["hero", "collection", "story"],
+  "storyQuote": "Made for the moments when happiness, warmth and quiet joy are shared with the dogs you love.",
+  "storySignature": "Coco Rosette · London"
+}

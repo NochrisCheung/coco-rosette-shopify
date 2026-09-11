@@ -2,13 +2,14 @@
   assign featured_collection = section.settings.collection
   assign featured_collection_url = featured_collection.url
   assign featured_collection_title = featured_collection.title
+  assign featured_collection_label = 'collections.view_all' | t: title: featured_collection_title
   assign has_products = false
   if featured_collection != blank and featured_collection.products_count > 0
     assign has_products = true
   endif
   if featured_collection.handle == 'the-collection'
     assign featured_collection_url = routes.all_products_collection_url
-    assign featured_collection_title = 'collections.title' | t
+    assign featured_collection_label = 'collections.view_all_dogwear' | t
   endif
 %}
 
@@ -31,7 +32,7 @@
       </div>
       {% if section.settings.show_collection_link %}
         <p class="coco-featured-collection__cta">
-          <a class="coco-button--secondary" href="{{ featured_collection_url }}">{{ 'collections.view_all' | t: title: featured_collection_title | escape }}</a>
+          <a class="coco-button--secondary" href="{{ featured_collection_url }}">{{ featured_collection_label | escape }}</a>
         </p>
       {% endif %}
     {% else %}

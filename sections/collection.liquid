@@ -31,9 +31,9 @@
     <nav class="coco-catalogue-collection-links" aria-label="{{ 'search.shop_by_collection' | t }}">
       <ul class="coco-catalogue-collection-links__list" role="list">
         <li><a href="{{ routes.all_products_collection_url }}"{% if collection.handle == 'all' %} aria-current="page"{% endif %}>{{ 'search.all_products' | t }}</a></li>
-        <li><a href="{{ collections['wedding-dresses'].url }}"{% if collection.handle == 'wedding-dresses' %} aria-current="page"{% endif %}>{{ collections['wedding-dresses'].title | default: 'Wedding Dresses' | escape }}</a></li>
-        <li><a href="{{ collections['evening-gowns'].url }}"{% if collection.handle == 'evening-gowns' %} aria-current="page"{% endif %}>{{ collections['evening-gowns'].title | default: 'Evening Gowns' | escape }}</a></li>
-        <li><a href="{{ collections['casual'].url }}"{% if collection.handle == 'casual' %} aria-current="page"{% endif %}>{{ collections['casual'].title | default: 'Casual' | escape }}</a></li>
+        <li><a href="{{ collections['wedding-dresses'].url }}"{% if collection.handle == 'wedding-dresses' %} aria-current="page"{% endif %}>{{ collections['wedding-dresses'].title | escape }}</a></li>
+        <li><a href="{{ collections['evening-gowns'].url }}"{% if collection.handle == 'evening-gowns' %} aria-current="page"{% endif %}>{{ collections['evening-gowns'].title | escape }}</a></li>
+        <li><a href="{{ collections['casual'].url }}"{% if collection.handle == 'casual' %} aria-current="page"{% endif %}>{{ collections['casual'].title | escape }}</a></li>
       </ul>
     </nav>
   </header>

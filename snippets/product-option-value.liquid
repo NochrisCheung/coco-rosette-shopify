@@ -4,15 +4,22 @@
   @param {string} product_form_id - The parent product form identifier.
   @param {product_option} option - The Shopify product option.
   @param {product_option_value} option_value - The Shopify option value to render.
+  @param {string} role - Canonical colour, design or size role.
+  @param {object} identity - Validated catalogue option identity.
 {% enddoc %}
 
 {% liquid
   assign input_id = product_form_id | append: '-Option-' | append: option.position | append: '-' | append: option_value.id
   assign is_colour_option = false
-  assign swatch_colour = blank
-  assign swatch_image_url = blank
+  assign swatch_colour = ''
+  assign swatch_image_url = ''
+  assign value_id = option_value.id | append: ''
+  assign is_custom_size = false
+  if role == 'size' and value_id == identity.custom_size_id
+    assign is_custom_size = true
+  endif
 
-  if option.name == 'Colour'
+  if role == 'colour'
     assign is_colour_option = true
 
     if option_value.swatch.image != blank
@@ -20,27 +27,7 @@
     elsif option_value.swatch.color != blank
       assign swatch_colour = 'rgb(' | append: option_value.swatch.color.rgb | append: ')'
     else
-      assign option_value_handle = option_value.name | handleize
-      case option_value_handle
-        when 'black'
-          assign swatch_colour = '#1d1515'
-        when 'blue', 'pale-blue'
-          assign swatch_colour = '#b9cfdf'
-        when 'cream', 'creamy-white', 'ivory', 'white'
-          assign swatch_colour = '#f7f0e6'
-        when 'green'
-          assign swatch_colour = '#98b78d'
-        when 'lavender'
-          assign swatch_colour = '#b7a7d0'
-        when 'orange'
-          assign swatch_colour = '#e8a25d'
-        when 'pink'
-          assign swatch_colour = '#e6aac2'
-        when 'red'
-          assign swatch_colour = '#9e2b40'
-        when 'yellow'
-          assign swatch_colour = '#dfbb45'
-      endcase
+      assign swatch_colour = identity.swatches[value_id]
     endif
   endif
 %}
@@ -51,7 +38,7 @@
   name="option-{{ option.position }}"
   value="{{ option_value.name | escape }}"
   data-option-value-id="{{ option_value.id }}"
-  {% if option.name == 'Size' and option_value.name == 'Custom size' %}data-custom-size-option{% endif %}
+  {% if is_custom_size %}data-custom-size-option{% endif %}
   {% if option_value.product_url != blank %}data-option-product-url="{{ option_value.product_url | escape }}"{% endif %}
   {% if option_value.selected %}checked{% endif %}
   {% unless option_value.available %}disabled{% endunless %}
@@ -59,7 +46,7 @@
 <label
   class="coco-product__option-label{% if is_colour_option %} coco-product__option-label--colour{% endif %}"
   for="{{ input_id }}"
-  {% if option.name == 'Size' and option_value.name == 'Custom size' %}data-custom-size-option-label{% endif %}
+  {% if is_custom_size %}data-custom-size-option-label{% endif %}
 >
   {% if is_colour_option %}
     <span

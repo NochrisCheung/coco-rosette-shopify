@@ -25,6 +25,56 @@
     }
   }
 
+  let cartRequestInFlight = false;
+  const cartViews = () => Array.from(document.querySelectorAll('coco-cart-page, coco-cart-drawer'));
+  const cartSectionIds = () => cartViews().map((view) => view.dataset.sectionId);
+  const setCartLoading = (form, isLoading) => {
+    const controls = new Set([
+      ...document.querySelectorAll('[data-cart-page-form] button, [data-cart-page-form] input, [data-cart-change-form] button, [data-cart-change-form] input, .coco-cart-drawer__checkout'),
+      ...(form?.querySelectorAll('button, input') || [])
+    ]);
+    controls.forEach((control) => {
+      if (isLoading) {
+        control.dataset.wasDisabled = String(control.disabled);
+        control.disabled = true;
+      } else if (control.dataset.wasDisabled !== undefined) {
+        control.disabled = control.dataset.wasDisabled === 'true';
+        delete control.dataset.wasDisabled;
+      }
+    });
+  };
+
+  const cartFocusTarget = () => {
+    const active = document.activeElement;
+    if (active?.id) return () => document.getElementById(active.id);
+    const buttonAttribute = ['data-cart-page-quantity-button', 'data-quantity-button'].find((name) => active?.hasAttribute(name));
+    if (buttonAttribute) {
+      const inputId = active.closest('.coco-quantity-input')?.querySelector('input')?.id;
+      const selector = `[${buttonAttribute}="${active.getAttribute(buttonAttribute)}"]`;
+      return () => document.getElementById(inputId)?.closest('.coco-quantity-input')?.querySelector(selector);
+    }
+    return () => active?.isConnected ? active : document.querySelector('[data-cart-page-checkout], [data-cart-drawer-trigger]');
+  };
+
+  const renderCartSections = (data, errorMessage) => {
+    // Validate the entire bundled response before replacing either view.
+    const replacements = cartViews().map((view) => {
+      const markup = data.sections?.[view.dataset.sectionId];
+      if (typeof markup !== 'string') throw new CocoCartError(errorMessage);
+      const parsed = new DOMParser().parseFromString(markup, 'text/html');
+      const replacement = parsed.querySelector(view.localName);
+      if (!replacement || replacement.dataset.sectionId !== view.dataset.sectionId) throw new CocoCartError(errorMessage);
+      replacement.querySelectorAll('noscript').forEach((element) => element.remove());
+      return { view, replacement };
+    });
+    const drawer = replacements.find(({ view }) => view.localName === 'coco-cart-drawer');
+    const rawCount = drawer?.replacement.dataset.cartItemCount;
+    const count = rawCount === undefined ? data.item_count : /^\d+$/.test(rawCount) ? Number(rawCount) : NaN;
+    if (!Number.isSafeInteger(count) || count < 0 || (data.item_count !== undefined && data.item_count !== count)) throw new CocoCartError(errorMessage);
+    replacements.forEach(({ view, replacement }) => view.renderSection(replacement));
+    updateCartCount(count);
+  };
+
   class CocoCartDrawer extends HTMLElement {
     connectedCallback() {
       this.opener = null;
@@ -62,10 +112,6 @@
         if (this.opener) this.opener.focus();
         this.opener = null;
       });
-    }
-
-    get sectionId() {
-      return this.dataset.sectionId;
     }
 
     get messages() {
@@ -132,31 +178,12 @@
       announce(message);
     }
 
-    setLoading(form, isLoading) {
-      const controls = form?.querySelectorAll('button, input');
-      controls?.forEach((control) => {
-        if (isLoading) {
-          control.dataset.wasDisabled = String(control.disabled);
-          control.disabled = true;
-          return;
-        }
-        control.disabled = control.dataset.wasDisabled === 'true';
-        delete control.dataset.wasDisabled;
-      });
-    }
-
-    updateCount(itemCount) {
-      updateCartCount(itemCount);
-    }
-
-    renderSection(sectionMarkup) {
-      const parsedDocument = new DOMParser().parseFromString(sectionMarkup, 'text/html');
-      const replacement = parsedDocument.querySelector('coco-cart-drawer');
-      if (!replacement) throw new CocoCartError(this.messages.refreshError);
-
+    renderSection(replacement) {
+      const wasOpen = this.dialog?.open;
       this.innerHTML = replacement.innerHTML;
+      this.dataset.cartItemCount = replacement.dataset.cartItemCount;
       this.setDialog();
-      return Number.parseInt(replacement.dataset.cartItemCount, 10);
+      if (wasOpen) this.open();
     }
 
     async updateCart(payload) {
@@ -168,7 +195,7 @@
         },
         body: JSON.stringify({
           ...payload,
-          sections: [this.sectionId],
+          sections: cartSectionIds(),
           sections_url: window.location.pathname
         })
       });
@@ -182,9 +209,8 @@
       return data;
     }
 
-    async addProduct(form) {
-      const formData = new FormData(form);
-      formData.append('sections', this.sectionId);
+    async addProduct(formData) {
+      formData.append('sections', cartSectionIds().join(','));
       formData.append('sections_url', window.location.pathname);
 
       const response = await fetch(`${rootUrl}cart/add.js`, {
@@ -203,21 +229,25 @@
     }
 
     async handleCartResult(request, form, successMessage, fallbackError, { openOnSuccess = true, showNotice = false } = {}) {
+      if (cartRequestInFlight) return;
+      cartRequestInFlight = true;
+      const restoreFocus = cartFocusTarget();
+      let refreshed = false;
       this.clearError(form);
-      this.setLoading(form, true);
+      setCartLoading(form, true);
       try {
-        const data = await request;
-        const sectionMarkup = data.sections?.[this.sectionId];
-        if (!sectionMarkup) throw new CocoCartError(this.messages.refreshError);
-        const itemCount = this.renderSection(sectionMarkup);
-        this.updateCount(Number.isNaN(itemCount) ? data.item_count : itemCount);
+        const data = await request();
+        renderCartSections(data, this.messages.refreshError);
+        refreshed = true;
         if (openOnSuccess) this.open();
         this.setStatus(successMessage);
         if (showNotice) this.showNotice(successMessage);
       } catch (error) {
         this.showError(form, error instanceof CocoCartError ? error.message : fallbackError);
       } finally {
-        this.setLoading(form, false);
+        setCartLoading(form, false);
+        cartRequestInFlight = false;
+        if (refreshed) restoreFocus()?.focus({ preventScroll: true });
       }
     }
 
@@ -239,7 +269,7 @@
       const removeLink = event.target.closest('[data-cart-remove]');
       if (removeLink && this.contains(removeLink)) {
         event.preventDefault();
-        this.handleCartResult(this.updateCart({ id: removeLink.dataset.cartRemove, quantity: 0 }), null, this.messages.itemRemoved, this.messages.updateError);
+        this.handleCartResult(() => this.updateCart({ id: removeLink.dataset.cartRemove, quantity: 0 }), null, this.messages.itemRemoved, this.messages.updateError);
         return;
       }
 
@@ -267,7 +297,9 @@
         if (!this.dialog || !('showModal' in this.dialog)) return;
         if (event.submitter?.dataset.shopifyPaymentButton) return;
         event.preventDefault();
-        this.handleCartResult(this.addProduct(productForm), productForm, this.messages.itemAdded, this.messages.addError, { openOnSuccess: false, showNotice: true });
+        // Capture native FormData before loading disables its successful controls.
+        const formData = new FormData(productForm);
+        this.handleCartResult(() => this.addProduct(formData), productForm, this.messages.itemAdded, this.messages.addError, { openOnSuccess: false, showNotice: true });
         return;
       }
 
@@ -277,7 +309,7 @@
       event.preventDefault();
       const formData = new FormData(cartChangeForm);
       const quantity = Number.parseInt(formData.get('quantity'), 10);
-      this.handleCartResult(this.updateCart({ id: formData.get('id'), quantity: Number.isNaN(quantity) ? 0 : quantity }), cartChangeForm, this.messages.updated, this.messages.updateError);
+      this.handleCartResult(() => this.updateCart({ id: formData.get('id'), quantity: Number.isNaN(quantity) ? 0 : quantity }), cartChangeForm, this.messages.updated, this.messages.updateError);
     }
   }
 
@@ -299,10 +331,6 @@
       this.removeEventListener('click', this.handleClick);
       this.removeEventListener('keydown', this.handleKeydown);
       this.removeEventListener('submit', this.handleSubmit);
-    }
-
-    get sectionId() {
-      return this.dataset.sectionId;
     }
 
     get messages() {
@@ -338,23 +366,7 @@
       announce(message);
     }
 
-    setLoading(isLoading) {
-      this.form?.querySelectorAll('button, input').forEach((control) => {
-        if (isLoading) {
-          control.dataset.wasDisabled = String(control.disabled);
-          control.disabled = true;
-          return;
-        }
-        control.disabled = control.dataset.wasDisabled === 'true';
-        delete control.dataset.wasDisabled;
-      });
-    }
-
-    renderSection(sectionMarkup) {
-      const parsedDocument = new DOMParser().parseFromString(sectionMarkup, 'text/html');
-      const replacement = parsedDocument.querySelector('coco-cart-page');
-      if (!replacement) throw new CocoCartError(this.messages.updateError);
-
+    renderSection(replacement) {
       this.innerHTML = replacement.innerHTML;
       this.setElements();
     }
@@ -369,7 +381,7 @@
         body: JSON.stringify({
           id,
           quantity,
-          sections: [this.sectionId],
+          sections: cartSectionIds(),
           sections_url: window.location.pathname
         })
       });
@@ -384,19 +396,23 @@
     }
 
     async handleCartUpdate(request, successMessage) {
+      if (cartRequestInFlight) return;
+      cartRequestInFlight = true;
+      const restoreFocus = cartFocusTarget();
+      let refreshed = false;
       this.clearError();
-      this.setLoading(true);
+      setCartLoading(null, true);
       try {
-        const data = await request;
-        const sectionMarkup = data.sections?.[this.sectionId];
-        if (!sectionMarkup) throw new CocoCartError(this.messages.updateError);
-        this.renderSection(sectionMarkup);
-        updateCartCount(data.item_count);
+        const data = await request();
+        renderCartSections(data, this.messages.updateError);
+        refreshed = true;
         this.setStatus(successMessage);
       } catch (error) {
         this.showError(error instanceof CocoCartError ? error.message : this.messages.updateError);
       } finally {
-        this.setLoading(false);
+        setCartLoading(null, false);
+        cartRequestInFlight = false;
+        if (refreshed) restoreFocus()?.focus({ preventScroll: true });
       }
     }
 
@@ -406,7 +422,7 @@
 
       const quantity = Number.parseInt(quantityInput.value, 10);
       this.handleCartUpdate(
-        this.updateLine(quantityInput.dataset.cartLineKey, Number.isNaN(quantity) ? 0 : Math.max(0, quantity)),
+        () => this.updateLine(quantityInput.dataset.cartLineKey, Number.isNaN(quantity) ? 0 : Math.max(0, quantity)),
         this.messages.updated
       );
     }
@@ -423,7 +439,7 @@
       const removeLink = event.target.closest('[data-cart-page-remove]');
       if (removeLink && this.contains(removeLink)) {
         event.preventDefault();
-        this.handleCartUpdate(this.updateLine(removeLink.dataset.cartPageRemove, 0), this.messages.itemRemoved);
+        this.handleCartUpdate(() => this.updateLine(removeLink.dataset.cartPageRemove, 0), this.messages.itemRemoved);
         return;
       }
 
@@ -437,7 +453,7 @@
       const quantity = quantityButton.dataset.cartPageQuantityButton === 'increase'
         ? currentQuantity + 1
         : Math.max(0, currentQuantity - 1);
-      this.handleCartUpdate(this.updateLine(quantityInput.dataset.cartLineKey, quantity), quantity === 0 ? this.messages.itemRemoved : this.messages.updated);
+      this.handleCartUpdate(() => this.updateLine(quantityInput.dataset.cartLineKey, quantity), quantity === 0 ? this.messages.itemRemoved : this.messages.updated);
     }
 
     handleSubmit(event) {
@@ -450,7 +466,7 @@
       if (!quantityInput) return;
       const quantity = Number.parseInt(quantityInput.value, 10);
       this.handleCartUpdate(
-        this.updateLine(quantityInput.dataset.cartLineKey, Number.isNaN(quantity) ? 0 : Math.max(0, quantity)),
+        () => this.updateLine(quantityInput.dataset.cartLineKey, Number.isNaN(quantity) ? 0 : Math.max(0, quantity)),
         this.messages.updated
       );
     }
@@ -460,15 +476,17 @@
     connectedCallback() {
       this.form = this.querySelector('[data-product-form]');
       this.variantInput = this.querySelector('[data-product-variant-id]');
-      this.price = this.querySelector('[data-product-price]');
-      this.availability = this.querySelector('[data-product-availability]');
       this.addButton = this.querySelector('[data-product-add-button]');
-      this.variantData = this.querySelector('[data-product-variants]');
-      this.variants = this.variantData ? JSON.parse(this.variantData.textContent) : [];
+      this.optionRequest = null;
+      this.savedMeasurements = new Map();
+      this.handleFormData = this.handleFormData.bind(this);
+      this.form?.addEventListener('formdata', this.handleFormData);
       this.handleChange = this.handleChange.bind(this);
       this.handleClick = this.handleClick.bind(this);
+      this.handleSubmit = this.handleSubmit.bind(this);
       this.addEventListener('change', this.handleChange);
       this.addEventListener('click', this.handleClick);
+      this.addEventListener('submit', this.handleSubmit);
       this.enhanceDescriptionDisclosures();
       this.syncCustomSizeMeasurements();
     }
@@ -476,6 +494,9 @@
     disconnectedCallback() {
       this.removeEventListener('change', this.handleChange);
       this.removeEventListener('click', this.handleClick);
+      this.optionRequest?.abort();
+      this.form?.removeEventListener('formdata', this.handleFormData);
+      this.removeEventListener('submit', this.handleSubmit);
     }
 
     get selectedOptionInputs() {
@@ -492,10 +513,6 @@
           return firstPosition - secondPosition;
         }
       );
-    }
-
-    get selectedOptionNames() {
-      return this.selectedOptionInputs.map((input) => input.value);
     }
 
     enhanceDescriptionDisclosures() {
@@ -539,23 +556,14 @@
         return;
       }
 
-      if (this.dataset.usesServerOptionRefresh === 'true') {
-        this.refreshOptionValues();
-        return;
-      }
-
-      const variant = this.variants.find((candidate) => candidate.options.every((option, index) => option === this.selectedOptionNames[index]));
-      this.updateVariant(variant);
+      this.refreshOptionValues();
     }
 
     syncCustomSizeMeasurements() {
       const measurements = this.querySelector('[data-custom-size-measurements]');
       if (!measurements) return;
 
-      const selectedSize = this.selectedOptionInputs.find((input) => (
-        input.closest('[data-product-option-name]')?.dataset.productOptionName === 'size'
-      ));
-      const isCustomSize = selectedSize?.value.trim().toLocaleLowerCase() === 'custom size';
+      const isCustomSize = this.selectedOptionInputs.some((input) => input.hasAttribute('data-custom-size-option'));
       measurements.hidden = !isCustomSize;
       measurements.setAttribute('aria-hidden', String(!isCustomSize));
       measurements.querySelectorAll('[data-custom-size-input]').forEach((input) => {
@@ -565,6 +573,10 @@
     }
 
     handleClick(event) {
+      if (event.target.closest('[data-product-options-retry]')) {
+        this.refreshOptionValues();
+        return;
+      }
       const mediaButton = event.target.closest('[data-product-media-button]');
       if (mediaButton && this.contains(mediaButton)) {
         this.selectMedia(mediaButton.dataset.productMediaButton);
@@ -578,49 +590,6 @@
       if (!quantityInput) return;
       const quantity = Number.parseInt(quantityInput.value, 10) || 1;
       quantityInput.value = quantityButton.dataset.productQuantityButton === 'increase' ? quantity + 1 : Math.max(1, quantity - 1);
-    }
-
-    renderPrice(variant) {
-      if (!this.price) return;
-
-      const price = document.createElement('p');
-      price.className = `coco-price${variant.compareAtPrice ? ' coco-price--sale' : ''}`;
-
-      if (variant.compareAtPrice) {
-        const compareAtPrice = document.createElement('s');
-        compareAtPrice.className = 'coco-price__compare';
-        compareAtPrice.textContent = variant.compareAtPrice;
-        price.append(compareAtPrice);
-      }
-
-      const currentPrice = document.createElement('span');
-      currentPrice.className = 'coco-price__current';
-      currentPrice.textContent = variant.price;
-      price.append(currentPrice);
-
-      this.price.replaceChildren(price);
-    }
-
-    updateVariant(variant) {
-      if (!variant) {
-        this.variantInput.value = '';
-        this.addButton.disabled = true;
-        this.addButton.textContent = this.addButton.dataset.unavailableLabel;
-        this.availability.textContent = this.addButton.dataset.unavailableLabel;
-        return;
-      }
-
-      this.variantInput.value = variant.id;
-      this.addButton.disabled = !variant.available;
-      this.addButton.textContent = variant.available ? this.addButton.dataset.addLabel : this.addButton.dataset.soldOutLabel;
-      this.availability.textContent = variant.available ? '' : this.addButton.dataset.soldOutLabel;
-      this.renderPrice(variant);
-
-      if (variant.featuredMediaId) this.selectMedia(variant.featuredMediaId);
-
-      const url = new URL(window.location.href);
-      url.searchParams.set('variant', variant.id);
-      window.history.replaceState({}, '', url);
     }
 
     selectMedia(mediaId) {
@@ -639,23 +608,94 @@
       });
     }
 
+    handleFormData(event) {
+      this.querySelectorAll('[data-custom-size-input]:enabled').forEach((input) => {
+        if (input.validity.valid) event.formData.set(input.name, input.value.replace(',', '.'));
+      });
+    }
+
+    handleSubmit(event) {
+      if (event.target !== this.form) return;
+      if (!this.variantInput?.value || this.addButton?.disabled || this.hasAttribute('aria-busy') || !this.form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+
     async refreshOptionValues() {
       const optionValueIds = this.selectedOptionInputs.map((input) => input.dataset.optionValueId);
-      if (optionValueIds.length === 0) return;
+      if (optionValueIds.length === 0 || !this.addButton) return;
+
+      this.optionRequest?.abort();
+      const request = new AbortController();
+      this.optionRequest = request;
+      this.setAttribute('aria-busy', 'true');
+      this.addButton.disabled = true;
+      // Never submit the previous variant while a different selection is pending.
+      this.variantInput.value = '';
+      const retry = this.querySelector('[data-product-options-retry]');
+      if (retry) retry.hidden = true;
+      const formError = this.querySelector('[data-product-form-error]');
+      if (formError) formError.hidden = true;
 
       const url = new URL(this.dataset.productUrl, window.location.origin);
+      const currentUrl = new URL(window.location.href);
+      for (const [key, value] of currentUrl.searchParams) {
+        if (!['variant', 'option_values', 'section_id'].includes(key)) url.searchParams.append(key, value);
+      }
       url.searchParams.set('option_values', optionValueIds.join(','));
+      const fetchUrl = new URL(url);
+      fetchUrl.searchParams.set('section_id', this.dataset.sectionId);
 
       try {
-        const response = await fetch(`${url.pathname}${url.search}&section_id=${this.dataset.sectionId}`);
+        const response = await fetch(fetchUrl, { signal: request.signal });
         if (!response.ok) throw new Error(this.dataset.optionRefreshError);
         const markup = await response.text();
         const replacement = new DOMParser().parseFromString(markup, 'text/html').querySelector('coco-product');
-        if (!replacement) throw new Error(this.dataset.optionRefreshError);
-        this.outerHTML = replacement.outerHTML;
+        if (!replacement || replacement.dataset.optionIdentityValid !== 'true' || replacement.dataset.productId !== this.dataset.productId) throw new Error(this.dataset.optionRefreshError);
+        const echoedSelection = optionValueIds.every((id, index) => (
+          replacement.querySelector(`[data-product-option-position="${index + 1}"] input:checked`)?.dataset.optionValueId === id
+        ));
+        if (!echoedSelection || replacement.querySelectorAll('[data-product-option] input:checked').length !== optionValueIds.length) throw new Error(this.dataset.optionRefreshError);
+        if (request.signal.aborted || !this.isConnected) return;
+        const focusId = document.activeElement?.id;
+        const selectionStart = document.activeElement?.selectionStart;
+        const selectionEnd = document.activeElement?.selectionEnd;
+        const disclosures = Array.from(this.querySelectorAll('.coco-product__description-disclosure')).map((element) => element.open);
+        // Take values immediately before replacement, including typing during the request.
+        this.querySelectorAll('[data-custom-size-input]').forEach((input) => this.savedMeasurements.set(input.name, input.value));
+        const quantity = this.querySelector('[data-product-quantity]')?.value;
+        const measurements = this.savedMeasurements;
+        // DOMParser parses with scripting disabled. Do not activate its noscript styles on adoption.
+        replacement.querySelectorAll('noscript').forEach((element) => element.remove());
+        this.replaceWith(replacement);
+        replacement.savedMeasurements = measurements;
+        replacement.querySelectorAll('[data-custom-size-input]').forEach((input) => {
+          input.value = measurements.get(input.name) || '';
+        });
+        if (quantity) replacement.querySelector('[data-product-quantity]').value = quantity;
+        replacement.querySelectorAll('.coco-product__description-disclosure').forEach((element, index) => { element.open = disclosures[index] === true; });
+        const variantId = replacement.querySelector('[data-product-variant-id]')?.value;
+        if (variantId) {
+          url.searchParams.delete('option_values');
+          url.searchParams.set('variant', variantId);
+        }
         window.history.replaceState({}, '', url);
-      } catch {
+        if (focusId) {
+          const focused = document.getElementById(focusId);
+          focused?.focus({ preventScroll: true });
+          if (focused && typeof selectionStart === 'number') focused.setSelectionRange(selectionStart, selectionEnd);
+        }
+      } catch (error) {
+        if (error.name === 'AbortError' || request.signal.aborted) return;
+        if (formError) {
+          formError.hidden = false;
+          formError.textContent = this.dataset.optionRefreshError;
+        }
+        if (retry) retry.hidden = false;
         announce(this.dataset.optionRefreshError);
+      } finally {
+        if (this.optionRequest === request) this.removeAttribute('aria-busy');
       }
     }
   }
@@ -731,6 +771,25 @@
     });
   };
 
+  const connectLocalisation = () => {
+    document.querySelectorAll('[data-localisation]').forEach((controls) => {
+      controls.dataset.enhanced = 'true';
+      controls.querySelectorAll('form').forEach((form) => {
+        form.querySelector('select')?.addEventListener('change', () => form.requestSubmit());
+        form.addEventListener('submit', (event) => {
+          const hasMeasurements = Array.from(document.querySelectorAll('[data-custom-size-input]')).some((input) => input.value !== '');
+          if (hasMeasurements && !window.confirm(controls.dataset.unsavedMessage)) {
+            event.preventDefault();
+            form.reset();
+            return;
+          }
+          const returnTo = form.querySelector('[name="return_to"]');
+          if (returnTo) returnTo.value = `${window.location.pathname}${window.location.search}`;
+        });
+      });
+    });
+  };
+
   if (!customElements.get('coco-cart-drawer')) customElements.define('coco-cart-drawer', CocoCartDrawer);
   if (!customElements.get('coco-cart-page')) customElements.define('coco-cart-page', CocoCartPage);
   if (!customElements.get('coco-product')) customElements.define('coco-product', CocoProduct);
@@ -738,4 +797,5 @@
   connectFacetDisclosures();
   connectFacetSorting();
   connectCookiePreferences();
+  connectLocalisation();
 })();

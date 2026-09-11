@@ -31,6 +31,10 @@
         </nav>
       {% endif %}
 
+      <div class="coco-header__localisation">
+        {% assign desktop_localisation_id = 'HeaderLocalisation-' | append: section.id %}
+        {% render 'localisation-controls', id_prefix: desktop_localisation_id %}
+      </div>
       <a
         class="coco-header__cart"
         href="{{ routes.cart_url }}"
@@ -57,6 +61,10 @@
         <nav class="coco-header__navigation coco-header__navigation--mobile" aria-label="{{ 'accessibility.mobile_navigation' | t }}">
           {% render 'menu-links', menu: section.settings.menu, menu_class: 'coco-navigation__list' %}
         </nav>
+        <div class="coco-mobile-navigation__localisation">
+          {% assign mobile_localisation_id = 'MobileLocalisation-' | append: section.id %}
+          {% render 'localisation-controls', id_prefix: mobile_localisation_id %}
+        </div>
       </div>
     </dialog>
   {% endif %}
@@ -65,13 +73,22 @@
 {% stylesheet %}
   .shopify-section-group-header-group { position: sticky; z-index: 30; top: 0; }
   .coco-header { position: relative; background: var(--cr-bg); }
-  .coco-header__inner { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); min-height: 6.25rem; padding: 1.75rem var(--cr-gutter) 0.625rem; }
-  .coco-header__logo { display: block; width: fit-content; }
-  .coco-header__logo-image { width: min(15.625rem, 100%); height: auto; }
-  .coco-header__right { display: flex; align-items: center; justify-self: end; gap: clamp(1.5rem, 3.5vw, 4rem); }
+  .coco-header__inner { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(1.5rem, 3vw, 4rem); min-height: 6.25rem; padding: 1.75rem var(--cr-gutter) 0.625rem; }
+  .coco-header__logo { display: block; width: 15.625rem; max-width: 100%; }
+  .coco-header__logo-image { width: 100%; height: auto; }
+  .coco-header__right { display: flex; align-items: center; justify-self: end; gap: clamp(0.75rem, 2vw, 2rem); }
+  .coco-mobile-navigation__localisation { padding: 1.25rem; }
+  @media (min-width: 851px) {
+    .coco-header__localisation .coco-localisation { flex-wrap: nowrap; }
+    .coco-header__localisation label { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  }
+  @media (min-width: 851px) and (max-width: 1100px) {
+    .coco-header__logo { width: 10rem; }
+  }
   .coco-navigation__list, .coco-navigation__sub-list { margin: 0; padding: 0; list-style: none; }
-  .coco-navigation__list { display: flex; align-items: center; gap: clamp(2rem, 4.5vw, 5rem); }
+  .coco-navigation__list { display: flex; align-items: center; gap: clamp(1rem, 2vw, 2.5rem); }
   .coco-navigation__item { position: relative; }
+  .coco-header__navigation--desktop .coco-navigation__link { white-space: nowrap; }
   .coco-navigation__link, .coco-navigation__sub-list a { color: var(--cr-gray); font-size: 0.6875rem; font-weight: 300; letter-spacing: 0.29em; line-height: 1.4; text-decoration: none; text-transform: uppercase; transition: color 160ms ease; }
   .coco-navigation__link:hover, .coco-navigation__link[aria-current='page'], .coco-navigation__sub-list a:hover, .coco-navigation__sub-list a[aria-current='page'], .coco-header__cart:hover { color: var(--cr-ink); }
   .coco-navigation__sub-list { position: absolute; z-index: 2; top: calc(100% + 0.75rem); left: -1rem; display: none; min-width: 12rem; border: 1px solid var(--cr-divider); background: var(--cr-bg); box-shadow: var(--cr-menu-shadow); }
@@ -88,10 +105,10 @@
   @media (max-width: 850px) {
     .coco-header__inner { grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem; gap: 0; min-height: 5.5rem; padding-top: 1.25rem; }
     .coco-header__menu-button { display: inline-grid; }
-    .coco-header__logo { justify-self: center; }
-    .coco-header__logo-image { width: min(12.5rem, 100%); }
+    .coco-header__logo { width: 12.5rem; justify-self: center; }
     .coco-header__right { grid-column: 3; gap: 0; }
     .coco-header__navigation--desktop { display: none; }
+    .coco-header__localisation { display: none; }
     .coco-mobile-navigation[open] { display: block; width: min(83vw, 21rem); max-width: none; height: 100dvh; max-height: none; margin: 0 auto 0 0; border: 0; padding: 0; background: var(--cr-bg); }
     .coco-mobile-navigation[open] .coco-mobile-navigation__panel { animation: coco-mobile-navigation-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) both; }
     .coco-mobile-navigation[open][data-closing='true'] .coco-mobile-navigation__panel { animation: coco-mobile-navigation-leave 240ms ease-in both; }
@@ -138,7 +155,7 @@
 
   @media (max-width: 420px) {
     .coco-header__inner { padding-inline: 1rem; }
-    .coco-header__logo-image { width: 10.5rem; }
+    .coco-header__logo { width: 10.5rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {

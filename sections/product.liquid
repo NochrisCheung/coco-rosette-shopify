@@ -2,11 +2,12 @@
   assign current_variant = product.selected_or_first_available_variant
   assign product_form_id = 'ProductForm-' | append: section.id
   assign selected_media_id = blank
-  assign uses_variant_map = false
+  assign option_identity = product.metafields.custom.storefront_option_identity.value
   assign has_custom_size_option = false
   assign current_variant_uses_custom_size = false
   assign size_guide_page = pages['size-guide']
   assign product_form_errors_id = 'ProductFormErrors-' | append: section.id
+  assign measurement_pattern = '(?:0[.,][1-9]|[1-9][0-9]*(?:[.,][0-9])?)'
 
   if current_variant != blank and current_variant.featured_media != blank
     assign selected_media_id = current_variant.featured_media.id
@@ -14,14 +15,11 @@
     assign selected_media_id = product.media.first.id
   endif
 
-  if product.variants_count <= 250
-    assign uses_variant_map = true
-  endif
-
   for option in product.options_with_values
-    if option.name == 'Size'
+    if option.position == option_identity.roles.size
       for option_value in option.values
-        if option_value.name == 'Custom size'
+        assign value_id = option_value.id | append: ''
+        if value_id == option_identity.custom_size_id
           assign has_custom_size_option = true
           if option_value.selected
             assign current_variant_uses_custom_size = true
@@ -32,8 +30,10 @@
     endif
   endfor
 %}
+{% capture option_identity_valid %}{% render 'product-option-identity-valid', product: product, identity: option_identity %}{% endcapture %}
+{% assign option_identity_valid = option_identity_valid | strip %}
 
-<coco-product class="coco-product" data-section-id="{{ section.id }}" data-product-url="{{ product.url }}" data-option-refresh-error="{{ 'products.options_refresh_error' | t | escape }}"{% unless uses_variant_map %} data-uses-server-option-refresh="true"{% endunless %}>
+<coco-product class="coco-product" data-product-id="{{ product.id }}" data-section-id="{{ section.id }}" data-product-url="{{ product.url }}" data-option-refresh-error="{{ 'products.options_refresh_error' | t | escape }}" data-option-identity-valid="{{ option_identity_valid }}">
   <div class="coco-product__media-column">
     {% if product.media.size > 0 %}
       <div class="coco-product__media-stage">
@@ -115,29 +115,28 @@
       <span class="coco-product__garden-rule" aria-hidden="true"></span>
     </div>
 
+    {% if option_identity_valid == 'true' %}
     {% form 'product', product, id: product_form_id, class: 'coco-product__form', data-product-form: 'true' %}
       {% render 'form-errors', form: form, id: product_form_errors_id %}
       <p class="coco-form-errors" role="alert" hidden data-product-form-error></p>
+      <button type="button" class="coco-text-link" hidden data-product-options-retry>{{ 'products.retry_options' | t }}</button>
       <input type="hidden" name="id" value="{{ current_variant.id }}" data-product-variant-id>
 
       {% unless product.has_only_default_variant %}
         <div class="coco-product__options">
-          {% for option in product.options_with_values %}
-            {% if option.name == 'Colour' %}
-              {% render 'product-option', product_form_id: product_form_id, option: option, size_guide_page: size_guide_page %}
-            {% endif %}
-          {% endfor %}
-          {% for option in product.options_with_values %}
-            {% unless option.name == 'Colour' or option.name == 'Size' %}
-              {% render 'product-option', product_form_id: product_form_id, option: option, size_guide_page: size_guide_page %}
-            {% endunless %}
-          {% endfor %}
-          {% for option in product.options_with_values %}
-            {% if option.name == 'Size' %}
-              {% render 'product-option', product_form_id: product_form_id, option: option, size_guide_page: size_guide_page %}
-            {% endif %}
+          {% assign option_roles = 'colour,design,size' | split: ',' %}
+          {% for role in option_roles %}
+            {% for option in product.options_with_values %}
+              {% if option.position == option_identity.roles[role] %}
+                {% render 'product-option', product_form_id: product_form_id, option: option, size_guide_page: size_guide_page, role: role, identity: option_identity %}
+              {% endif %}
+            {% endfor %}
           {% endfor %}
         </div>
+        <noscript>
+          <style>[data-product-option] input:not(:checked), [data-product-option] input:not(:checked) + label { display: none !important; }</style>
+          <p>{{ 'products.javascript_required' | t }}</p>
+        </noscript>
       {% endunless %}
 
       {% if has_custom_size_option %}
@@ -147,24 +146,18 @@
           <div class="coco-product__custom-size-fields">
             <p>
               <label for="CustomSizeChest-{{ section.id }}">{{ 'products.custom_size.chest' | t }}</label>
-              <input id="CustomSizeChest-{{ section.id }}" class="coco-field" type="number" name="properties[Chest (cm)]" min="0.1" step="0.1" inputmode="decimal" aria-describedby="CustomSizeHelp-{{ section.id }}" data-custom-size-input{% if current_variant_uses_custom_size %} required{% else %} disabled{% endif %}>
+              <input id="CustomSizeChest-{{ section.id }}" class="coco-field" type="text" name="properties[Chest (cm)]" pattern="{{ measurement_pattern }}" title="{{ 'products.custom_size.description' | t | escape }}" inputmode="decimal" aria-describedby="CustomSizeHelp-{{ section.id }}" data-custom-size-input{% if current_variant_uses_custom_size %} required{% else %} disabled{% endif %}>
             </p>
             <p>
               <label for="CustomSizeLength-{{ section.id }}">{{ 'products.custom_size.body_length' | t }}</label>
-              <input id="CustomSizeLength-{{ section.id }}" class="coco-field" type="number" name="properties[Body length (cm)]" min="0.1" step="0.1" inputmode="decimal" aria-describedby="CustomSizeHelp-{{ section.id }}" data-custom-size-input{% if current_variant_uses_custom_size %} required{% else %} disabled{% endif %}>
+              <input id="CustomSizeLength-{{ section.id }}" class="coco-field" type="text" name="properties[Body length (cm)]" pattern="{{ measurement_pattern }}" title="{{ 'products.custom_size.description' | t | escape }}" inputmode="decimal" aria-describedby="CustomSizeHelp-{{ section.id }}" data-custom-size-input{% if current_variant_uses_custom_size %} required{% else %} disabled{% endif %}>
             </p>
             <p>
               <label for="CustomSizeNeck-{{ section.id }}">{{ 'products.custom_size.neck_circumference' | t }}</label>
-              <input id="CustomSizeNeck-{{ section.id }}" class="coco-field" type="number" name="properties[Neck circumference (cm)]" min="0.1" step="0.1" inputmode="decimal" aria-describedby="CustomSizeHelp-{{ section.id }}" data-custom-size-input{% if current_variant_uses_custom_size %} required{% else %} disabled{% endif %}>
+              <input id="CustomSizeNeck-{{ section.id }}" class="coco-field" type="text" name="properties[Neck circumference (cm)]" pattern="{{ measurement_pattern }}" title="{{ 'products.custom_size.description' | t | escape }}" inputmode="decimal" aria-describedby="CustomSizeHelp-{{ section.id }}" data-custom-size-input{% if current_variant_uses_custom_size %} required{% else %} disabled{% endif %}>
             </p>
           </div>
         </fieldset>
-        {% unless current_variant_uses_custom_size %}
-          <noscript>
-            <style>[data-custom-size-option], [data-custom-size-option-label] { display: none !important; }</style>
-            <p class="coco-product__custom-size-noscript">{{ 'products.custom_size.javascript_required' | t }}</p>
-          </noscript>
-        {% endunless %}
       {% endif %}
 
       <p class="coco-product__delivery-promise">{{ 'products.delivery_promise' | t }}</p>
@@ -180,9 +173,6 @@
           class="coco-button coco-product__add-button"
           type="submit"
           data-product-add-button
-          data-add-label="{{ 'products.add_to_bag' | t }}"
-          data-sold-out-label="{{ 'products.sold_out' | t }}"
-          data-unavailable-label="{{ 'products.unavailable' | t }}"
           {% if current_variant == blank or current_variant.available == false %}disabled{% endif %}
         >
           {% if current_variant == blank %}
@@ -202,28 +192,15 @@
         {% endif %}
       </p>
     {% endform %}
+    {% else %}
+      <p role="alert">{{ 'products.options_unavailable' | t }}</p>
+    {% endif %}
 
     {% if product.description != blank %}
       <div class="coco-product__description rte" data-product-description>{{ product.description }}</div>
     {% endif %}
   </div>
 
-  {% if uses_variant_map %}
-    <script type="application/json" data-product-variants>
-      [
-        {% for variant in product.variants %}
-          {
-            "id": {{ variant.id | json }},
-            "options": {{ variant.options | json }},
-            "available": {{ variant.available | json }},
-            "price": {{ variant.price | money | json }},
-            "compareAtPrice": {% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price | money | json }}{% else %}null{% endif %},
-            "featuredMediaId": {% if variant.featured_media != blank %}{{ variant.featured_media.id | json }}{% else %}null{% endif %}
-          }{% unless forloop.last %},{% endunless %}
-        {% endfor %}
-      ]
-    </script>
-  {% endif %}
 </coco-product>
 
 {% stylesheet %}
@@ -284,7 +261,6 @@
   .coco-product__custom-size-fields p { margin: 0; }
   .coco-product__custom-size-fields label { display: block; margin-bottom: 0.4rem; font-size: 0.75rem; }
   .coco-product__custom-size-fields .coco-field { min-width: 0; }
-  .coco-product__custom-size-noscript { margin-top: 1rem; color: var(--cr-rose); font-size: 0.75rem; }
   .coco-product__delivery-promise { margin-top: 1.5rem; border-inline-start: 1px solid var(--cr-divider); padding-inline-start: 0.75rem; color: var(--cr-gray); font-size: 0.75rem; }
   .coco-product__purchase-row { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
   .coco-product__add-button { flex: 1; }

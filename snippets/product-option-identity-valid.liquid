@@ -1,0 +1,50 @@
+{% doc %}
+  Returns `true` only when the catalogue-owned option map covers the native structure.
+  Missing or stale data must not enable an ambiguous purchase form.
+
+  @param {product} product - Product with native option values.
+  @param {object} identity - custom.storefront_option_identity.value.
+{% enddoc %}
+{%- capture structure -%}
+  {%- for option in product.options_with_values -%}
+    {{- option.position -}}:
+    {%- for value in option.values -%}{{- value.id -}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%};
+  {%- endfor -%}
+{%- endcapture -%}
+{%- liquid
+  assign valid = false
+  assign covered = 0
+  assign custom_found = false
+  if identity != blank and identity.structure == structure and identity.roles.size != blank
+    assign valid = true
+    if identity.custom_size_id == blank
+      assign custom_found = true
+    endif
+    for option in product.options_with_values
+      assign matches = 0
+      assign roles = 'colour,design,size' | split: ','
+      for role in roles
+        if identity.roles[role] == option.position
+          assign matches = matches | plus: 1
+        endif
+      endfor
+      if matches != 1
+        assign valid = false
+      endif
+      assign covered = covered | plus: matches
+      for value in option.values
+        assign value_id = value.id | append: ''
+        if option.position == identity.roles.size and value_id == identity.custom_size_id
+          assign custom_found = true
+        endif
+        if option.position == identity.roles.colour and identity.swatches[value_id] == blank and value.swatch == blank
+          assign valid = false
+        endif
+      endfor
+    endfor
+    if covered != product.options_with_values.size or custom_found == false
+      assign valid = false
+    endif
+  endif
+-%}
+{{- valid -}}

@@ -1,0 +1,18 @@
+name: Theme quality
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  source-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npx --yes --package=@shopify/cli@4.7.1 shopify theme check
+    # No Shopify token, deployment, store settings or automatic screenshot approvals in CI.
+    # Remote browser QA remains an explicit preview check tied to the intended theme ID.

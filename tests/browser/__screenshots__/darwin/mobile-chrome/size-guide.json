@@ -1,0 +1,21 @@
+{
+  "status": "MERCHANT_APPROVED",
+  "themeId": "197438931288",
+  "route": "/pages/size-guide",
+  "imageHash": "a1746bd45a4d09637a4d99345f694364173bd9b07ae2ba1fb3f39d876acff31f",
+  "capturedAt": "2026-09-08T23:40:00.325Z",
+  "environment": {
+    "browser": "152.0.7977.83",
+    "platform": "darwin",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "project": "mobile-chrome",
+    "locale": "en-GB",
+    "screenshotScale": "css"
+  },
+  "referencePath": "tests/browser/__screenshots__/darwin/mobile-chrome/size-guide.png",
+  "reviewNote": "9 September 2026: merchant explicitly confirms all visuals are correct and instructs proceeding with currencies and launch, in response to the exact Chrome reference approval request. Further Safari checks waived.",
+  "approvedAt": "2026-09-08T23:46:10.111Z"
+}

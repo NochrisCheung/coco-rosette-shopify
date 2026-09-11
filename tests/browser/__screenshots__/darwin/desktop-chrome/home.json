@@ -1,0 +1,21 @@
+{
+  "status": "MERCHANT_APPROVED",
+  "themeId": "197438931288",
+  "route": "/",
+  "imageHash": "62031d0bf186bda996baa615374e8c0a4906078609c900f1db853f838b8bfa34",
+  "capturedAt": "2026-09-08T23:39:36.799Z",
+  "environment": {
+    "browser": "152.0.7977.83",
+    "platform": "darwin",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "project": "desktop-chrome",
+    "locale": "en-GB",
+    "screenshotScale": "css"
+  },
+  "referencePath": "tests/browser/__screenshots__/darwin/desktop-chrome/home.png",
+  "reviewNote": "9 September 2026: merchant explicitly confirms all visuals are correct and instructs proceeding with currencies and launch, in response to the exact Chrome reference approval request. Further Safari checks waived.",
+  "approvedAt": "2026-09-08T23:46:10.065Z"
+}

@@ -4,35 +4,39 @@
   @param {string} product_form_id - The parent product form identifier.
   @param {product_option} option - The Shopify product option.
   @param {page} size_guide_page - The shared Size guide Page, when available.
+  @param {string} role - Canonical colour, design or size role.
+  @param {object} identity - Validated catalogue option identity.
 {% enddoc %}
 
 <fieldset
   class="coco-product__option"
   data-product-option="{{ option.position | minus: 1 }}"
   data-product-option-position="{{ option.position }}"
-  data-product-option-name="{{ option.name | handleize }}"
+  data-product-option-role="{{ role }}"
 >
   <legend class="coco-product__option-heading">
     <span class="coco-ui-label">{{ option.name | escape }}</span>
-    {% if option.name == 'Size' and size_guide_page != blank %}
+    {% if role == 'size' and size_guide_page != blank %}
       <a class="coco-product__size-guide-link" href="{{ size_guide_page.url }}">{{ 'products.size_guide' | t }}</a>
     {% endif %}
   </legend>
   <div class="coco-product__option-values">
-    {% if option.name == 'Size' %}
+    {% if role == 'size' %}
       {% for option_value in option.values %}
-        {% unless option_value.name == 'Custom size' %}
-          {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value %}
+        {% assign value_id = option_value.id | append: '' %}
+        {% unless value_id == identity.custom_size_id %}
+          {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value, role: role, identity: identity %}
         {% endunless %}
       {% endfor %}
       {% for option_value in option.values %}
-        {% if option_value.name == 'Custom size' %}
-          {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value %}
+        {% assign value_id = option_value.id | append: '' %}
+        {% if value_id == identity.custom_size_id %}
+          {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value, role: role, identity: identity %}
         {% endif %}
       {% endfor %}
     {% else %}
       {% for option_value in option.values %}
-        {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value %}
+        {% render 'product-option-value', product_form_id: product_form_id, option: option, option_value: option_value, role: role, identity: identity %}
       {% endfor %}
     {% endif %}
   </div>

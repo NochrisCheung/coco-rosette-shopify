@@ -15,3 +15,8 @@ node_modules/
 ## Release files
 release
 *.zip
+
+# Local quality evidence; never commit cookies or remote theme settings.
+test-results/
+playwright-report/
+.quality/

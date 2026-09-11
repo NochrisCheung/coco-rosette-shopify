@@ -1,0 +1,21 @@
+{
+  "status": "MERCHANT_APPROVED",
+  "themeId": "197438931288",
+  "route": "/pages/size-guide",
+  "imageHash": "0cba4bc77bfd3009925e7d9ff0b2f1604f0f1edc38104b4890babb2c25972cf9",
+  "capturedAt": "2026-09-08T23:39:41.856Z",
+  "environment": {
+    "browser": "152.0.7977.83",
+    "platform": "darwin",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "project": "desktop-chrome",
+    "locale": "en-GB",
+    "screenshotScale": "css"
+  },
+  "referencePath": "tests/browser/__screenshots__/darwin/desktop-chrome/size-guide.png",
+  "reviewNote": "9 September 2026: merchant explicitly confirms all visuals are correct and instructs proceeding with currencies and launch, in response to the exact Chrome reference approval request. Further Safari checks waived.",
+  "approvedAt": "2026-09-08T23:46:10.108Z"
+}

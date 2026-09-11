@@ -17,6 +17,7 @@
     "skip_to_content": "Skip to content"
   },
   "brand": {
+    "hero_alt": "A dog wearing a white couture gown at a wedding ceremony",
     "tagline": "Because It's Their Day Too",
     "story_heading": "The Coco Rosette story"
   },
@@ -53,6 +54,7 @@
     }
   },
   "collections": {
+    "image_alt": "{{ title }} collection",
     "editor_empty": "Select a collection with available products to display this section.",
     "empty": "There are no products in this collection yet.",
     "eyebrow": "Coco Rosette",
@@ -64,7 +66,8 @@
     "previous": "Previous",
     "previous_page": "Previous page",
     "title": "Collections",
-    "view_all": "View all {{ title }}"
+    "view_all": "View all {{ title }}",
+    "view_all_dogwear": "View all dogwear"
   },
   "contact": {
     "email": "Email address",
@@ -108,17 +111,19 @@
     "eyebrow": "Coco Rosette"
   },
   "products": {
+    "options_unavailable": "This product's options are temporarily unavailable. Please contact us for help.",
+    "retry_options": "Retry selection",
+    "javascript_required": "Enable JavaScript to choose different options. Only the selection currently shown can be added to your bag.",
     "add_to_bag": "Add to bag",
     "custom_size": {
       "body_length": "Body length (cm)",
       "chest": "Chest (cm)",
-      "description": "Enter your dog's measurements in centimetres.",
-      "javascript_required": "To order a Custom size, please enable JavaScript so that we can collect the required measurements.",
+      "description": "Enter positive measurements in centimetres, with up to one decimal place (for example, 30.5 or 30,5).",
       "measurements": "Custom size measurements",
       "neck_circumference": "Neck circumference (cm)"
     },
     "decrease_quantity": "Decrease quantity",
-    "delivery_promise": "Made to order · delivery within 28 days of order.",
+    "delivery_promise": "Estimated delivery: around 4–5 weeks. Your delivery dates are shown at checkout.",
     "from": "From",
     "increase_quantity": "Increase quantity",
     "options_refresh_error": "The selected options could not be updated. Please try again.",
@@ -130,6 +135,12 @@
     "sold_out": "Sold out"
   },
   "search": {
+    "sort": {
+      "title-ascending": "Name, A–Z",
+      "title-descending": "Name, Z–A",
+      "price-ascending": "Price, low to high",
+      "price-descending": "Price, high to low"
+    },
     "all_products": "All products",
     "apply_filters": "Apply filters",
     "clear_all": "Clear all",
@@ -151,5 +162,17 @@
     "empty_query": "Enter a product name to search Coco Rosette.",
     "no_results": "No results found for “{{ terms }}”.",
     "results_for": "{{ count }} results found for “{{ terms }}”."
+  },
+  "localisation": {
+    "country": "Country / currency",
+    "language": "Language",
+    "update_country": "Update country",
+    "update_language": "Update language",
+    "unsaved_measurements": "Changing country or language will clear measurements that have not been added to your bag. Continue?"
+  },
+  "seo": {
+    "all_dogwear_title": "All Dogwear | Luxury Occasionwear for Dogs | Coco Rosette",
+    "all_dogwear_description": "Explore Coco Rosette’s made-to-order dog wedding dresses, evening gowns and partywear for celebrations, photographs and special occasions.",
+    "tagged": "tagged \"{{ tags }}\""
   }
 }

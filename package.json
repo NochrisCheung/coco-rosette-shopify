@@ -1,0 +1,15 @@
+{
+  "name": "coco-rosette-shopify-quality",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "npm test && shopify theme check",
+    "test:browser": "playwright test --grep-invert @visual",
+    "test:localisation-browser": "playwright test --config playwright.localisation.config.cjs",
+    "test:visual": "playwright test --grep @visual",
+    "capture:visual": "CR_VISUAL_CAPTURE=1 playwright test --grep @visual",
+    "guard": "node scripts/theme-guard.cjs"
+  },
+  "devDependencies": { "@playwright/test": "1.63.0", "liquidjs": "10.29.0" }
+}

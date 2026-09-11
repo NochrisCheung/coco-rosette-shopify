@@ -14,7 +14,7 @@
     {% for handle in collection_handles %}
       {% assign collection_item = collections[handle] %}
       {% if collection_item != blank and collection_item.products_count > 0 %}
-        {% assign collection_item_image_alt = collection_item.title | append: ' collection' %}
+        {% assign collection_item_image_alt = 'collections.image_alt' | t: title: collection_item.title %}
         <article class="coco-collection-directory-card">
           <a class="coco-collection-directory-card__link" href="{{ collection_item.url }}">
             <div class="coco-collection-directory-card__media">

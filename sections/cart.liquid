@@ -34,7 +34,7 @@
                   <ul class="coco-cart-page__properties" role="list">
                     {% for property in item.properties %}
                       {% assign property_first_character = property.first | slice: 0 %}
-                      {% if property.last != blank and property_first_character != '_' %}<li>{{ property.first | escape }}: {{ property.last | escape }}</li>{% endif %}
+                      {% if property.last != blank and property_first_character != '_' %}<li>{% render 'line-property-label', key: property.first %}: {{ property.last | escape }}</li>{% endif %}
                     {% endfor %}
                   </ul>
                 {% endunless %}

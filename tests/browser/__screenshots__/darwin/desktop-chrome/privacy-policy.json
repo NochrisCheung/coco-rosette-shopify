@@ -1,0 +1,21 @@
+{
+  "status": "MERCHANT_APPROVED",
+  "themeId": "197438931288",
+  "route": "/policies/privacy-policy",
+  "imageHash": "6fad6c6f6d781e97bb1bde92c494e1451a64ccb33a843e6423c75edd2db0a7f4",
+  "capturedAt": "2026-09-08T23:39:43.267Z",
+  "environment": {
+    "browser": "152.0.7977.83",
+    "platform": "darwin",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "project": "desktop-chrome",
+    "locale": "en-GB",
+    "screenshotScale": "css"
+  },
+  "referencePath": "tests/browser/__screenshots__/darwin/desktop-chrome/privacy-policy.png",
+  "reviewNote": "9 September 2026: merchant explicitly confirms all visuals are correct and instructs proceeding with currencies and launch, in response to the exact Chrome reference approval request. Further Safari checks waived.",
+  "approvedAt": "2026-09-08T23:46:10.086Z"
+}

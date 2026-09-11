@@ -1,0 +1,59 @@
+{% doc %}
+  Native country and language forms, reused in the desktop header and mobile drawer.
+  Shopify owns available choices, currency conversion and destination routing.
+
+  @param {string} id_prefix - Unique placement ID.
+{% enddoc %}
+{% if localization.available_countries.size > 0 or localization.available_languages.size > 0 %}
+  <div class="coco-localisation" data-localisation data-unsaved-message="{{ 'localisation.unsaved_measurements' | t | escape }}">
+    {% if localization.available_languages.size > 0 %}
+      {% assign language_form_id = id_prefix | append: '-Language' %}
+      {% form 'localization', id: language_form_id, return_to: request.path %}
+        <label for="{{ language_form_id }}-Select">{{ 'localisation.language' | t }}</label>
+        <select id="{{ language_form_id }}-Select" name="language_code"{% if localization.available_languages.size == 1 %} disabled{% endif %}>
+          {% if localization.available_languages.size == 1 %}
+            <option value="{{ localization.language.iso_code }}" lang="{{ localization.language.iso_code }}" selected>{{ localization.language.endonym_name | capitalize | escape }}</option>
+          {% else %}
+            {% for language in localization.available_languages %}
+              <option value="{{ language.iso_code }}" lang="{{ language.iso_code }}"{% if language.iso_code == localization.language.iso_code %} selected{% endif %}>{{ language.endonym_name | capitalize | escape }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+        <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}">
+        {% if localization.available_languages.size > 1 %}
+          <button type="submit" class="coco-text-link">{{ 'localisation.update_language' | t }}</button>
+        {% endif %}
+      {% endform %}
+    {% endif %}
+    {% if localization.available_countries.size > 0 %}
+      {% assign country_form_id = id_prefix | append: '-Country' %}
+      {% form 'localization', id: country_form_id, return_to: request.path %}
+        <label for="{{ country_form_id }}-Select">{{ 'localisation.country' | t }}</label>
+        <select id="{{ country_form_id }}-Select" name="country_code"{% if localization.available_countries.size == 1 %} disabled{% endif %}>
+          {% for country in localization.available_countries %}
+            <option value="{{ country.iso_code }}"{% if country.iso_code == localization.country.iso_code %} selected{% endif %}>{{ country.name | escape }} · {{ country.currency.iso_code }}</option>
+          {% endfor %}
+        </select>
+        <input type="hidden" name="language_code" value="{{ localization.language.iso_code }}">
+        {% if localization.available_countries.size > 1 %}
+          <button type="submit" class="coco-text-link">{{ 'localisation.update_country' | t }}</button>
+        {% endif %}
+      {% endform %}
+    {% endif %}
+  </div>
+{% endif %}
+
+{% stylesheet %}
+  .coco-localisation { display: flex; flex-wrap: wrap; align-items: start; gap: 0.75rem; }
+  .coco-localisation form { display: grid; gap: 0.25rem; min-width: 0; max-width: 100%; }
+  .coco-localisation label { color: var(--cr-gray); font-size: 0.625rem; }
+  .coco-localisation select { width: 100%; max-width: 14rem; min-height: 2.75rem; border: 0; border-bottom: 1px solid var(--cr-divider); border-radius: 0; padding-inline: 0.25rem; background: transparent; color: var(--cr-ink); font-family: var(--cr-sans); font-size: 0.75rem; }
+  .coco-localisation select[name='language_code'] { width: 6.25rem; }
+  .coco-localisation select[name='country_code'] { width: 12rem; }
+  .coco-localisation select:disabled { opacity: 1; color: var(--cr-gray); }
+  .coco-localisation button { min-height: 2.75rem; justify-self: start; font-size: 0.625rem; }
+  .coco-localisation[data-enhanced] button { display: none; }
+  @media (max-width: 850px) {
+    .coco-localisation select, .coco-localisation button { min-height: 3rem; }
+  }
+{% endstylesheet %}

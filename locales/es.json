@@ -1,0 +1,147 @@
+{
+  "404": {
+    "title": "404",
+    "not_found": "Página no encontrada.",
+    "copy": "La página que buscas no está disponible. Descubre nuestra colección.",
+    "back_to_shopping": "Volver a la tienda"
+  },
+  "accessibility": {
+    "close": "Cerrar",
+    "footer_navigation": "Páginas del sitio",
+    "footer_social_navigation": "Redes sociales de Coco Rosette",
+    "legal_navigation": "Información legal",
+    "home": "Inicio de {{ shop_name }}",
+    "main_navigation": "Navegación principal",
+    "mobile_navigation": "Navegación móvil",
+    "open_menu": "Abrir el menú",
+    "skip_to_content": "Ir al contenido"
+  },
+  "brand": {
+    "hero_alt": "Un perro con un vestido blanco de alta costura en una ceremonia de boda",
+    "tagline": "Porque también es su gran día",
+    "story_heading": "La historia de Coco Rosette"
+  },
+  "cart": {
+    "bag": "Cesta",
+    "add_error": "No se ha podido añadir el artículo a la cesta. Inténtalo de nuevo.",
+    "continue_shopping": "Seguir comprando",
+    "checkout": "Tramitar pedido",
+    "decrease_quantity": "Reducir la cantidad de {{ product }}",
+    "empty": "Tu cesta está vacía.",
+    "increase_quantity": "Aumentar la cantidad de {{ product }}",
+    "items_in_bag": { "one": "{{ count }} artículo en la cesta", "other": "{{ count }} artículos en la cesta" },
+    "item_added": "Artículo añadido a la cesta.",
+    "item_removed": "Artículo eliminado de la cesta.",
+    "refresh_error": "No se ha podido recargar la cesta. Inténtalo de nuevo.",
+    "title": "Tu cesta",
+    "subtotal": "Subtotal",
+    "update": "Actualizar",
+    "update_error": "No se ha podido actualizar la cesta. Inténtalo de nuevo.",
+    "updated": "Cesta actualizada.",
+    "remove": "Eliminar",
+    "quantity": "Cantidad de {{ product }}",
+    "view_bag": "Ver cesta"
+  },
+  "customers": { "login": { "email": "Correo electrónico", "password": "Contraseña", "submit": "Iniciar sesión", "title": "Inicio de sesión" } },
+  "collections": {
+    "image_alt": "Colección {{ title }}",
+    "editor_empty": "Selecciona una colección con productos disponibles para mostrar esta sección.",
+    "empty": "Todavía no hay productos en esta colección.",
+    "eyebrow": "Coco Rosette",
+    "more_from": "Más de {{ title }}",
+    "next": "Siguiente",
+    "next_page": "Página siguiente",
+    "page_number": "Página {{ number }}",
+    "pagination_label": "Paginación de la colección",
+    "previous": "Anterior",
+    "previous_page": "Página anterior",
+    "title": "Colecciones",
+    "view_all": "Ver toda la colección {{ title }}",
+    "view_all_dogwear": "Ver toda la ropa para perros"
+  },
+  "contact": {
+    "email": "Dirección de correo electrónico",
+    "eyebrow": "Atención al cliente",
+    "message": "¿Cómo podemos ayudarte?",
+    "name": "Nombre",
+    "order_number": "Número de pedido (opcional)",
+    "submit": "Enviar mensaje",
+    "success": "Gracias. Tu mensaje se ha enviado correctamente.",
+    "title": "Contacto"
+  },
+  "gift_card": {
+    "add_to_apple_wallet": "Añadir a Apple Wallet",
+    "card": "Tarjeta regalo",
+    "expired": "Esta tarjeta regalo ha caducado",
+    "expires_on": "Caduca el {{ expires_on }}",
+    "use_at_checkout": "Utiliza esta tarjeta regalo al pagar"
+  },
+  "header": { "account": "Cuenta", "search": "Buscar", "sign_in": "Iniciar sesión" },
+  "forms": { "error_heading": "Corrige los siguientes datos:" },
+  "footer": {
+    "cookie_preferences": "Preferencias de cookies",
+    "delivery_policy": "Política de envíos",
+    "returns_and_refunds": "Devoluciones y reembolsos",
+    "privacy_policy": "Política de privacidad",
+    "terms_of_service": "Términos y condiciones"
+  },
+  "password": { "eyebrow": "Coco Rosette", "title": "Esta tienda es privada", "password": "Contraseña", "enter": "Entrar" },
+  "pages": { "eyebrow": "Coco Rosette" },
+  "products": {
+    "options_unavailable": "Las opciones de este producto no están disponibles temporalmente. Contacta con nosotros si necesitas ayuda.",
+    "retry_options": "Reintentar la selección",
+    "javascript_required": "Activa JavaScript para elegir otras opciones. Solo se puede añadir a la cesta la selección que se muestra actualmente.",
+    "add_to_bag": "Añadir a la cesta",
+    "custom_size": {
+      "body_length": "Largo del lomo (cm)",
+      "chest": "Contorno de pecho (cm)",
+      "description": "Introduce medidas positivas en centímetros, con un máximo de un decimal (por ejemplo, 30,5 o 30.5).",
+      "measurements": "Medidas para la confección a medida",
+      "neck_circumference": "Contorno de cuello (cm)"
+    },
+    "decrease_quantity": "Reducir cantidad",
+    "delivery_promise": "Entrega estimada: entre 4 y 5 semanas. Las fechas de entrega se muestran al finalizar la compra.",
+    "from": "Desde",
+    "increase_quantity": "Aumentar cantidad",
+    "options_refresh_error": "No se han podido actualizar las opciones seleccionadas. Inténtalo de nuevo.",
+    "quantity": "Cantidad",
+    "size_guide": "Guía de tallas",
+    "unavailable": "Esta combinación no está disponible.",
+    "view_details": "Ver detalles",
+    "view_media": "Ver imagen del producto {{ position }}",
+    "sold_out": "Agotado"
+  },
+  "search": {
+    "sort": { "title-ascending": "Nombre, A–Z", "title-descending": "Nombre, Z–A", "price-ascending": "Precio, de menor a mayor", "price-descending": "Precio, de mayor a menor" },
+    "all_products": "Todos los productos",
+    "apply_filters": "Aplicar filtros",
+    "clear_all": "Borrar todo",
+    "collection": "Colección",
+    "eyebrow": "Descubre Coco Rosette",
+    "title": "Búsqueda",
+    "shop_title": "Toda la ropa para perros",
+    "shop_by_collection": "Comprar por colección",
+    "filter_products": "Filtrar productos",
+    "sort_by": "Ordenar por",
+    "price_from": "Desde",
+    "price_to": "Hasta",
+    "product_count": { "one": "{{ count }} producto", "other": "{{ count }} productos" },
+    "placeholder": "Buscar productos",
+    "submit": "Buscar",
+    "empty_query": "Introduce el nombre de un producto para buscar en Coco Rosette.",
+    "no_results": "No se han encontrado resultados para «{{ terms }}».",
+    "results_for": "{{ count }} resultados para «{{ terms }}»."
+  },
+  "localisation": {
+    "country": "País / moneda",
+    "language": "Idioma",
+    "update_country": "Cambiar país",
+    "update_language": "Cambiar idioma",
+    "unsaved_measurements": "Al cambiar de país o de idioma se borrarán las medidas que no se hayan añadido a la cesta. ¿Quieres continuar?"
+  },
+  "seo": {
+    "all_dogwear_title": "Ropa de ceremonia para perros | Coco Rosette",
+    "all_dogwear_description": "Descubre los vestidos de boda, de noche y de fiesta para perros de Coco Rosette, confeccionados por encargo para celebraciones y momentos especiales.",
+    "tagged": "con la etiqueta «{{ tags }}»"
+  }
+}

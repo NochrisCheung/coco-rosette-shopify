@@ -36,13 +36,13 @@
           <a href="{{ routes.all_products_collection_url }}"{% if active_collection_handle == 'all' %} aria-current="page"{% endif %}>{{ 'search.all_products' | t }}</a>
         </li>
         <li>
-          <a href="{{ collections['wedding-dresses'].url }}"{% if active_collection_handle == 'wedding-dresses' %} aria-current="page"{% endif %}>{{ collections['wedding-dresses'].title | default: 'Wedding Dresses' | escape }}</a>
+          <a href="{{ collections['wedding-dresses'].url }}"{% if active_collection_handle == 'wedding-dresses' %} aria-current="page"{% endif %}>{{ collections['wedding-dresses'].title | escape }}</a>
         </li>
         <li>
-          <a href="{{ collections['evening-gowns'].url }}"{% if active_collection_handle == 'evening-gowns' %} aria-current="page"{% endif %}>{{ collections['evening-gowns'].title | default: 'Evening Gowns' | escape }}</a>
+          <a href="{{ collections['evening-gowns'].url }}"{% if active_collection_handle == 'evening-gowns' %} aria-current="page"{% endif %}>{{ collections['evening-gowns'].title | escape }}</a>
         </li>
         <li>
-          <a href="{{ collections['casual'].url }}"{% if active_collection_handle == 'casual' %} aria-current="page"{% endif %}>{{ collections['casual'].title | default: 'Casual' | escape }}</a>
+          <a href="{{ collections['casual'].url }}"{% if active_collection_handle == 'casual' %} aria-current="page"{% endif %}>{{ collections['casual'].title | escape }}</a>
         </li>
       </ul>
     </nav>
@@ -107,11 +107,12 @@
                         id="Filter-{{ form_id }}-{{ filter.min_value.param_name | handleize }}"
                         class="coco-field"
                         name="{{ filter.min_value.param_name }}"
-                        value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+                        value="{% if filter.min_value.value != nil %}{{ filter.min_value.value | divided_by: 100.0 }}{% endif %}"
                         type="number"
                         inputmode="decimal"
                         min="0"
-                        max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                        step="0.01"
+                        max="{{ filter.range_max | divided_by: 100.0 }}"
                         placeholder="0"
                       >
                     </div>
@@ -122,12 +123,13 @@
                         id="Filter-{{ form_id }}-{{ filter.max_value.param_name | handleize }}"
                         class="coco-field"
                         name="{{ filter.max_value.param_name }}"
-                        value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+                        value="{% if filter.max_value.value != nil %}{{ filter.max_value.value | divided_by: 100.0 }}{% endif %}"
                         type="number"
                         inputmode="decimal"
                         min="0"
-                        max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
-                        placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                        step="0.01"
+                        max="{{ filter.range_max | divided_by: 100.0 }}"
+                        placeholder="{{ filter.range_max | divided_by: 100.0 }}"
                       >
                     </div>
                   </div>
@@ -148,7 +150,8 @@
         <select id="SortBy-{{ form_id }}" class="coco-field" name="sort_by" data-facets-sort>
           {% for option in results.sort_options %}
             {% if supported_sort_values contains option.value %}
-              <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected="selected"{% endif %}>{{ option.name | escape }}</option>
+              {% assign sort_label_key = 'search.sort.' | append: option.value %}
+              <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected="selected"{% endif %}>{{ sort_label_key | t }}</option>
             {% endif %}
           {% endfor %}
         </select>

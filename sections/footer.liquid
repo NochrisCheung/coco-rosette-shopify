@@ -154,7 +154,18 @@
               {% if shop.terms_of_service != blank %}<li><a href="{{ shop.terms_of_service.url }}">{{ 'footer.terms_of_service' | t }}</a></li>{% endif %}
               {% if section.settings.privacy_menu != blank %}
                 {% for link in section.settings.privacy_menu.links %}
-                  <li><a href="{{ link.url }}">{{ link.title | escape }}</a></li>
+                  {% liquid
+                    assign privacy_link_url = link.url
+                    assign opt_out_path = '/pages/data-sharing-opt-out'
+                    assign shop_opt_out_url = shop.url | append: opt_out_path
+                    assign current_opt_out_url = request.origin | append: opt_out_path
+                    if link.url == opt_out_path or link.url == shop_opt_out_url or link.url == current_opt_out_url
+                      if pages['data-sharing-opt-out'] != blank
+                        assign privacy_link_url = pages['data-sharing-opt-out'].url
+                      endif
+                    endif
+                  %}
+                  <li><a href="{{ privacy_link_url | escape }}">{{ link.title | escape }}</a></li>
                 {% endfor %}
               {% endif %}
             </ul>
@@ -174,7 +185,8 @@
   .coco-footer__social-list, .coco-footer__navigation-list { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; }
   .coco-footer__social-list { gap: 0.5rem 1.25rem; }
   .coco-footer__navigation-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex: 1 1 26rem; gap: 1rem clamp(1.5rem, 4vw, 3.5rem); max-width: 34rem; }
-  .coco-footer__navigation-list { flex-direction: column; align-items: flex-start; gap: 0.625rem; }
+  .coco-footer__navigation-list { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; gap: 0.625rem; }
+  .coco-footer__navigation-list > li { max-width: 100%; }
   .coco-footer a, .coco-footer__privacy-button, .coco-footer__signature { color: var(--cr-gray); font-size: 0.625rem; font-weight: 400; letter-spacing: 0.18em; line-height: 1.6; text-decoration: none; text-transform: uppercase; }
   .coco-footer__privacy-button { border: 0; padding: 0; background: transparent; }
   .coco-footer a:hover, .coco-footer__privacy-button:hover { color: var(--cr-ink); }
@@ -183,7 +195,7 @@
     .coco-footer { padding-top: 3rem; }
     .coco-footer__main { flex-direction: column; align-items: center; text-align: center; }
     .coco-footer__identity { justify-items: center; }
-    .coco-footer__navigation-groups { width: 100%; }
+    .coco-footer__navigation-groups { width: 100%; flex: none; }
     .coco-footer__navigation-list { align-items: center; gap: 0.75rem; }
     .coco-footer__signature { white-space: normal; }
   }
