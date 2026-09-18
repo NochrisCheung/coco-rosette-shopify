@@ -39,8 +39,10 @@ The offline localisation browser suite is a prerequisite for option/locale/secti
 - Do not commit secrets, private CSV registers, generated local preferences, or unrelated work.
 - Do not reset, force-push, amend, delete a branch, discard a change, delete a remote theme, or make Shopify-admin changes without explicit merchant authority.
 - Upload only a cohesive reviewed change. `shopify theme publish` requires separate explicit approval and is never an incidental follow-up to an upload.
+- Keep one permanent theme named `Coco Rosette`. Use a temporary unpublished copy of the current live theme for verification; after an approved release and live readback, back up and remove only the expressly authorised superseded theme IDs. Leave unrelated themes untouched.
 - Use the guarded snapshot → audit → plan → preview-upload flow in `README.md`. Reconcile all source drift, explicitly approve merchant configuration files, and retain full readback evidence. Do not bypass a failed gate with raw CLI uploads.
 - Preserve `quality/approved-design.json` fingerprints and approved visual references. Changes require the corresponding design decision, not an automatic baseline refresh. Missing references, unavailable browsers and failed checks are release blockers.
+- If the merchant explicitly accepts an unavailable-browser limitation for a particular release, record the exact exception and the checks that did pass. Do not weaken the test matrix, label the unavailable check passed or reuse the exception on a later release. Appearance approval and publication approval are separate decisions.
 
 ## Handoff
 

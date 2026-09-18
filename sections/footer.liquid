@@ -4,6 +4,10 @@
   assign has_social_links = false
   assign has_legal_links = false
 
+  if section.settings.instagram_url != blank
+    assign has_social_links = true
+  endif
+
   if section.settings.brand_menu != blank and section.settings.brand_menu.links.size > 0
     for link in section.settings.brand_menu.links
       assign is_legal_link = false
@@ -80,6 +84,13 @@
       {% if has_social_links %}
         <nav class="coco-footer__social" aria-label="{{ 'accessibility.footer_social_navigation' | t }}">
           <ul class="coco-footer__social-list" role="list">
+            {% if section.settings.instagram_url != blank %}
+              <li>
+                <a class="coco-footer__instagram" href="{{ section.settings.instagram_url | escape }}" aria-label="Instagram — Coco Rosette">
+                  {% render 'icon', name: 'instagram', class: 'coco-icon' %}
+                </a>
+              </li>
+            {% endif %}
             {% for block in section.blocks %}
               {% if block.settings.url != blank and block.settings.label != blank %}
                 <li {{ block.shopify_attributes }}><a href="{{ block.settings.url | escape }}">{{ block.settings.label | escape }}</a></li>
@@ -88,6 +99,10 @@
           </ul>
         </nav>
       {% endif %}
+      <div class="coco-footer__localisation">
+        {% assign footer_localisation_id = 'FooterLocalisation-' | append: section.id %}
+        {% render 'localisation-controls', id_prefix: footer_localisation_id %}
+      </div>
     </div>
 
     {% if has_brand_links or has_customer_care_links or has_legal_links %}
@@ -184,6 +199,9 @@
   .coco-footer__logo-image { width: 11.25rem; height: auto; }
   .coco-footer__social-list, .coco-footer__navigation-list { display: flex; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; }
   .coco-footer__social-list { gap: 0.5rem 1.25rem; }
+  .coco-footer__instagram { display: inline-grid; width: 3rem; height: 3rem; place-items: center; }
+  .coco-footer__instagram .coco-icon { width: 1.375rem; height: 1.375rem; }
+  .coco-footer__localisation { max-width: 100%; }
   .coco-footer__navigation-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex: 1 1 26rem; gap: 1rem clamp(1.5rem, 4vw, 3.5rem); max-width: 34rem; }
   .coco-footer__navigation-list { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; gap: 0.625rem; }
   .coco-footer__navigation-list > li { max-width: 100%; }
@@ -191,6 +209,10 @@
   .coco-footer__privacy-button { border: 0; padding: 0; background: transparent; }
   .coco-footer a:hover, .coco-footer__privacy-button:hover { color: var(--cr-ink); }
   .coco-footer__signature { margin: 0; white-space: nowrap; }
+  .coco-footer a.coco-footer__instagram { color: var(--cr-ink); }
+  @media (max-width: 850px) {
+    .coco-footer__localisation { display: none; }
+  }
   @media (max-width: 700px) {
     .coco-footer { padding-top: 3rem; }
     .coco-footer__main { flex-direction: column; align-items: center; text-align: center; }
@@ -205,6 +227,11 @@
 {
   "name": "Coco Rosette footer",
   "settings": [
+    {
+      "type": "url",
+      "id": "instagram_url",
+      "label": "Instagram"
+    },
     {
       "type": "link_list",
       "id": "brand_menu",

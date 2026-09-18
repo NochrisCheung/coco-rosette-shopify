@@ -1,11 +1,11 @@
 {
   "status": "MERCHANT_APPROVED",
-  "themeId": "197438931288",
+  "themeId": "198614581592",
   "route": "/pages/size-guide",
-  "imageHash": "a1746bd45a4d09637a4d99345f694364173bd9b07ae2ba1fb3f39d876acff31f",
-  "capturedAt": "2026-09-08T23:40:00.325Z",
+  "imageHash": "4050a75983f5912e6d7067998378dfa9a4703452fa94d25116380964357f8e8c",
+  "capturedAt": "2026-09-18T16:00:15.920Z",
   "environment": {
-    "browser": "152.0.7977.83",
+    "browser": "153.0.8010.52",
     "platform": "darwin",
     "viewport": {
       "width": 390,
@@ -16,6 +16,6 @@
     "screenshotScale": "css"
   },
   "referencePath": "tests/browser/__screenshots__/darwin/mobile-chrome/size-guide.png",
-  "reviewNote": "9 September 2026: merchant explicitly confirms all visuals are correct and instructs proceeding with currencies and launch, in response to the exact Chrome reference approval request. Further Safari checks waived.",
-  "approvedAt": "2026-09-08T23:46:10.111Z"
+  "reviewNote": "18 September 2026: merchant reviewed preview theme 198614581592 and explicitly replied “Approve the footer appearance for release”. Candidate is cloned from the existing live theme with only the approved Instagram link and desktop localisation relocation. Agent inspected all six routes at desktop, tablet and mobile widths in Chrome 153.0.8010.52. This records the footer appearance approval, not Safari verification or a new approval of unrelated catalogue/policy content. Previous references are retained in Git and the local release evidence backup.",
+  "approvedAt": "2026-09-18T16:10:17.402Z"
 }

@@ -1,11 +1,11 @@
 {
   "status": "MERCHANT_APPROVED",
-  "themeId": "197438931288",
+  "themeId": "198614581592",
   "route": "/products/lucienne",
-  "imageHash": "5c7289978e28ce5a4cc094647a35b7bfae1e30ddec976643a082488a2f0c81e0",
-  "capturedAt": "2026-09-08T23:39:39.784Z",
+  "imageHash": "2079740d9eb2a34a34e86c9343b06984f6845e0ddf44053ca53c112648b73c88",
+  "capturedAt": "2026-09-18T15:59:59.283Z",
   "environment": {
-    "browser": "152.0.7977.83",
+    "browser": "153.0.8010.52",
     "platform": "darwin",
     "viewport": {
       "width": 1440,
@@ -16,6 +16,6 @@
     "screenshotScale": "css"
   },
   "referencePath": "tests/browser/__screenshots__/darwin/desktop-chrome/product.png",
-  "reviewNote": "9 September 2026: merchant explicitly confirms all visuals are correct and instructs proceeding with currencies and launch, in response to the exact Chrome reference approval request. Further Safari checks waived.",
-  "approvedAt": "2026-09-08T23:46:10.097Z"
+  "reviewNote": "18 September 2026: merchant reviewed preview theme 198614581592 and explicitly replied “Approve the footer appearance for release”. Candidate is cloned from the existing live theme with only the approved Instagram link and desktop localisation relocation. Agent inspected all six routes at desktop, tablet and mobile widths in Chrome 153.0.8010.52. This records the footer appearance approval, not Safari verification or a new approval of unrelated catalogue/policy content. Previous references are retained in Git and the local release evidence backup.",
+  "approvedAt": "2026-09-18T16:10:17.315Z"
 }

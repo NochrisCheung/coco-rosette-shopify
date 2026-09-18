@@ -1,11 +1,11 @@
 {
   "status": "MERCHANT_APPROVED",
-  "themeId": "197438931288",
+  "themeId": "198614581592",
   "route": "/cart",
-  "imageHash": "a58be7f4f63676c1daecdc74887d1e6b4266afbde54c24575159b83b153173ac",
-  "capturedAt": "2026-09-08T23:39:40.761Z",
+  "imageHash": "282c8733842b596c4726fcfd952f935879222f3a6de082e4d5297f7ad6180f6f",
+  "capturedAt": "2026-09-18T16:00:02.034Z",
   "environment": {
-    "browser": "152.0.7977.83",
+    "browser": "153.0.8010.52",
     "platform": "darwin",
     "viewport": {
       "width": 1440,
@@ -16,6 +16,6 @@
     "screenshotScale": "css"
   },
   "referencePath": "tests/browser/__screenshots__/darwin/desktop-chrome/empty-basket.png",
-  "reviewNote": "9 September 2026: merchant explicitly confirms all visuals are correct and instructs proceeding with currencies and launch, in response to the exact Chrome reference approval request. Further Safari checks waived.",
-  "approvedAt": "2026-09-08T23:46:10.059Z"
+  "reviewNote": "18 September 2026: merchant reviewed preview theme 198614581592 and explicitly replied “Approve the footer appearance for release”. Candidate is cloned from the existing live theme with only the approved Instagram link and desktop localisation relocation. Agent inspected all six routes at desktop, tablet and mobile widths in Chrome 153.0.8010.52. This records the footer appearance approval, not Safari verification or a new approval of unrelated catalogue/policy content. Previous references are retained in Git and the local release evidence backup.",
+  "approvedAt": "2026-09-18T16:10:17.319Z"
 }

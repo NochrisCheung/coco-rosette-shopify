@@ -1,13 +1,13 @@
 # Coco Rosette Shopify Theme
 
-This is the deployable Liquid theme for Coco Rosette, a made-to-order luxury dogwear storefront. It is a Shopify Online Store 2.0 theme, not a React or headless implementation.
+This is the deployable Liquid theme for Coco Rosette, a made-to-order luxury dog couture brand. Wedding dresses are its signature collection, not its entire identity. It is a Shopify Online Store 2.0 theme, not a React or headless implementation.
 
 The theme is independently version-controlled inside this directory. The workspace root is not a Git repository.
 
 ## Storefront direction
 
 - English uses British English throughout.
-- English, French and Spanish are published; native Markets supplies UK GBP, US USD and France/Spain EUR. Customer care remains English-only.
+- English, French and Spanish are published. Five native Markets cover the UK, US, Canada and all 27 EU countries: GBP, USD, CAD, fixed EUR for 21 EU destinations, and CZK/DKK/HUF/PLN/RON/SEK for the remaining six. France and Spain share European Union — EUR; their previous market records are inactive. Customer care remains English-only.
 - The current customer journey is Home, Collections, product pages, bag/cart, support pages, and native Shopify policies.
 - `/collections/all` is the primary All Dogwear catalogue route. Customer-facing search and blog journeys are intentionally excluded.
 - The technical Shopify `/search` route remains valid but is unpromoted and no-indexed.
@@ -32,7 +32,7 @@ quality/      Approved design fingerprints (not delivered)
 
 ## Local development
 
-Install [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) (validated with 4.7.1), Node 22 or later and Google Chrome. Authenticate through Shopify’s supported flow. From this directory:
+Install [Shopify CLI](https://shopify.dev/docs/api/shopify-cli) (release checked with 4.8.0), Node 22 or later and Google Chrome. Authenticate through Shopify’s supported flow. From this directory:
 
 ```sh
 npm ci --ignore-scripts
@@ -75,6 +75,19 @@ Do not duplicate Shopify-owned product media in `assets/`. Do not hard-code prod
 
 ## Live localisation contract
 
+The combined footer contains the Instagram link below the brand signature and
+native language/country selectors beneath it on desktop above 850px. At 850px and
+below, selectors remain in the navigation drawer, not duplicated in the footer.
+Language and country submit separately; changing currency does not translate the
+website or rewrite the destination-currency Delivery policy table.
+
+The footer's Theme Editor `Instagram` setting controls the icon. Its current
+value is `https://www.instagram.com/coco.rosette.studio/`, saved in
+`sections/footer-group.json`; clearing it hides the link. The section's URL schema
+has no external default. Preserve the existing menu selections when changing this
+setting. The icon is inline SVG from the existing icon snippet, with an accessible
+link name and a 48px target; no social embed, tracking script or new artwork is loaded.
+
 French and Spanish were published with the approved localised theme on 9 September. Future locale-file changes still require source/translation review and explicit release approval. The published product form consumes `custom.storefront_option_identity`: a catalogue-owned JSON map of native option positions/value IDs, canonical roles, Custom size identity and reviewed non-native swatches. The guarded lifecycle/backfill and real-store journeys were verified for that release. Missing/stale maps deliberately disable purchase; recheck current coverage after any option or catalogue change rather than relying on the historical backfill.
 
 Option changes use one native `option_values` section-refresh path in every language, not a translated-label lookup or embedded all-variants array. Stale/mismatched replies cannot enable purchase; retry remains explicit. Preserve measurements and quantity during replacement and remove parsed `noscript` elements before adoption. Without JavaScript, only the initial server-selected variant is offered. Basket labels translate, while fulfilment property keys remain unchanged. Actual checkout/notification presentation of those keys still requires review.
@@ -95,6 +108,15 @@ processing is not a theme test result; do not add duplicate tracking or Product
 graphs as a shortcut.
 
 ## Deployment boundary
+
+Keep one permanent Shopify theme named **Coco Rosette**, without V0 or dated suffixes. Use a temporary unpublished duplicate of the current live theme for guarded release checks. After successful approved publication and live verification, retain a verified private local backup before deleting the exact superseded Coco Rosette theme IDs. Leave unrelated themes alone. If a release is blocked, preserve the live theme and report any retained preview; do not bypass checks just to reduce the theme count.
+
+The 18 September release is live as theme `198614581592`. The three superseded
+Coco Rosette copies were backed up and deleted; Horizon was left unchanged.
+Chrome source/browser/visual acceptance passed. Safari/WebKit could not start and
+was explicitly waived by the merchant for this release only; this is not a Safari
+pass or a standing exemption for later work. Theme publication does not deploy
+workspace documentation, catalogue tools or Shopify-admin configuration.
 
 Use the guarded remote-write workflow:
 

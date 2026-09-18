@@ -14,6 +14,7 @@
     "footer": {
       "type": "footer",
       "settings": {
+        "instagram_url": "https://www.instagram.com/coco.rosette.studio/",
         "brand_menu": "website-pages",
         "menu": "customer-care",
         "privacy_menu": "privacy-choices"

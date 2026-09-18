@@ -12,7 +12,7 @@ async function mountHeader(page, locale, multipleLanguages = true, javascript = 
   ];
   const country = { iso_code: 'GB', name: { en: 'United Kingdom', fr: 'Royaume-Uni', es: 'Reino Unido' }[locale], currency: { iso_code: 'GBP' } };
   const language = languages.find((item) => item.iso_code === locale);
-  const markup = renderer(locale)('sections/header.liquid', {
+  const data = {
     section: { id: 'fixture', settings: { menu: { links: [
       { title: 'Collections', url: '/collections/all', links: [] },
       { title: { en: 'About', fr: 'À propos', es: 'Acerca de' }[locale], url: '/pages/about', links: [] },
@@ -20,8 +20,17 @@ async function mountHeader(page, locale, multipleLanguages = true, javascript = 
     routes: { root_url: '/', cart_url: '/cart', all_products_collection_url: '/collections/all', collections_url: '/collections' },
     localization: { country, language, available_countries: [country, { iso_code: 'US', name: 'United States', currency: { iso_code: 'USD' } }],
       available_languages: multipleLanguages ? languages : [language] },
+  };
+  const footer = renderer(locale)('sections/footer.liquid', { ...data,
+    section: { id: 'footer-fixture', blocks: [], settings: {
+      instagram_url: 'https://www.instagram.com/coco.rosette.studio/',
+      brand_menu: { links: data.section.settings.menu.links },
+      menu: { links: ['Contact', 'Size guide', 'Care guide', 'FAQ'].map((title, index) => ({ title, url: `/pages/support-${index}` })) },
+    } },
+    shop: { ...data.shop, ...Object.fromEntries(['shipping_policy', 'refund_policy', 'privacy_policy', 'terms_of_service'].map((key) => [key, { url: `/policies/${key}` }])) },
   });
-  const styles = ['sections/header.liquid', 'snippets/localisation-controls.liquid'].map((file) => source(file).match(/{% stylesheet %}([\s\S]*?){% endstylesheet %}/)[1]).join('\n');
+  const markup = renderer(locale)('sections/header.liquid', data);
+  const styles = ['sections/header.liquid', 'sections/footer.liquid', 'snippets/localisation-controls.liquid'].map((file) => source(file).match(/{% stylesheet %}([\s\S]*?){% endstylesheet %}/)[1]).join('\n');
   await page.route('**/*', (route) => {
     const url = new URL(route.request().url());
     if (url.origin !== 'https://header.test') throw new Error('Unexpected external fixture request');
@@ -31,7 +40,7 @@ async function mountHeader(page, locale, multipleLanguages = true, javascript = 
     }
     return route.fulfill({ contentType: 'text/html; charset=utf-8', body: `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>
       @font-face {font-family:Jost;src:url('/assets/jost-300-400-latin.woff2');font-weight:300 400;}
-      ${source('assets/theme.css')} ${styles}</style></head><body>${markup}<main>Fixture</main>
+      ${source('assets/theme.css')} ${styles}</style></head><body>${markup}<main style="min-height:12rem">Fixture</main>${footer}
       ${javascript ? `<script>${source('assets/theme.js')}</script>` : ''}</body></html>` });
   });
   await page.goto('https://header.test/');
@@ -39,14 +48,13 @@ async function mountHeader(page, locale, multipleLanguages = true, javascript = 
 }
 
 for (const locale of ['en', 'fr', 'es']) {
-  test(`${locale}: inline desktop selectors fit at the breakpoint and wider widths`, async ({ page }, testInfo) => {
+  test(`${locale}: desktop selectors move to the combined footer without header crowding`, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'Desktop layout matrix');
     await mountHeader(page, locale);
     for (const width of [851, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-      const selectors = ['.coco-header__logo', '.coco-header__navigation--desktop',
-        '.coco-header__localisation select[name="language_code"]', '.coco-header__localisation select[name="country_code"]', '.coco-header__cart'];
+      const selectors = ['.coco-header__logo', '.coco-header__navigation--desktop', '.coco-header__cart'];
       const boxes = await page.evaluate((selectors) => selectors.map((selector) => {
         const { x, y, width, height } = document.querySelector(selector).getBoundingClientRect();
         return { x, y, width, height };
@@ -58,13 +66,27 @@ for (const locale of ['en', 'fr', 'es']) {
       }
       expect(boxes.at(-1).x + boxes.at(-1).width).toBeLessThan(width);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+      await expect(page.locator('.coco-header__localisation')).toHaveCount(0);
+      const footerControls = page.locator('.coco-footer__localisation');
+      await expect(footerControls).toBeVisible();
+      for (const select of await footerControls.locator('select').all()) {
+        await expect(select).toBeVisible();
+        const id = await select.getAttribute('id');
+        await expect(footerControls.locator(`label[for="${id}"]`)).toBeVisible();
+      }
+      const identity = await page.locator('.coco-footer__identity').boundingBox();
+      const navigation = await page.locator('.coco-footer__navigation-groups').boundingBox();
+      expect(identity.x + identity.width).toBeLessThanOrEqual(navigation.x);
     }
-    const controls = page.locator('.coco-header__localisation');
+    const controls = page.locator('.coco-footer__localisation');
+    await page.locator('.coco-footer__instagram').focus();
+    await page.keyboard.press('Tab');
+    await expect(controls.locator('select[name="language_code"]')).toBeFocused();
     await controls.locator('select[name="language_code"]').focus();
     await page.keyboard.press('Tab');
     await expect(controls.locator('select[name="country_code"]')).toBeFocused();
     await page.keyboard.press('Tab');
-    await expect(page.locator('.coco-header__cart')).toBeFocused();
+    await expect(page.locator('.coco-footer__navigation-list a').first()).toBeFocused();
   });
 
   test(`${locale}: mobile drawer retains two labelled controls and a centred wordmark`, async ({ page }, testInfo) => {
@@ -75,7 +97,7 @@ for (const locale of ['en', 'fr', 'es']) {
       await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       const logo = await page.locator('.coco-header__logo').boundingBox();
       expect(Math.abs(logo.x + logo.width / 2 - width / 2)).toBeLessThan(1);
-      await expect(page.locator('.coco-header__localisation')).toBeHidden();
+      await expect(page.locator('.coco-footer__localisation')).toBeHidden();
       await page.locator('[data-mobile-navigation-trigger]').click();
       const dialog = page.locator('[data-mobile-navigation]');
       await expect(dialog.locator('select')).toHaveCount(2);
@@ -99,7 +121,7 @@ for (const locale of ['en', 'fr', 'es']) {
 test('English remains visible but disabled until another language is available', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await mountHeader(page, 'en', false);
-  const language = page.locator('.coco-header__localisation select[name="language_code"]');
+  const language = page.locator('.coco-footer__localisation select[name="language_code"]');
   await expect(language).toBeVisible();
   await expect(language).toBeDisabled();
   await expect(language.locator('option')).toHaveCount(1);
@@ -109,7 +131,25 @@ test('English remains visible but disabled until another language is available',
 test('without enhancement each available selector retains its explicit submit button', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await mountHeader(page, 'en', true, false);
-  const controls = page.locator('.coco-header__localisation');
+  const controls = page.locator('.coco-footer__localisation');
   await expect(controls.locator('button[type="submit"]')).toHaveCount(2);
   for (const button of await controls.locator('button').all()) await expect(button).toBeVisible();
+});
+
+test('Instagram has a labelled icon and generous target on desktop and mobile', async ({ page }, testInfo) => {
+  await mountHeader(page, 'en');
+  const link = page.getByRole('link', { name: 'Instagram — Coco Rosette', exact: true });
+  await expect(link).toHaveAttribute('href', 'https://www.instagram.com/coco.rosette.studio/');
+  await expect(link).toBeVisible();
+  await expect(link.locator('svg')).toHaveAttribute('aria-hidden', 'true');
+  const box = await link.boundingBox();
+  expect(box.width).toBeGreaterThanOrEqual(48);
+  expect(box.height).toBeGreaterThanOrEqual(48);
+  await page.locator('.coco-footer__logo').focus();
+  await page.keyboard.press('Tab');
+  await expect(link).toBeFocused();
+  await expect(link).not.toHaveCSS('box-shadow', 'none');
+  const ids = await page.locator('[id]').evaluateAll((nodes) => nodes.map((node) => node.id));
+  expect(new Set(ids).size).toBe(ids.length);
+  await page.screenshot({ path: testInfo.outputPath('footer-layout.png'), fullPage: true });
 });

@@ -23,6 +23,9 @@ test('global identity and a single, aligned footer', async ({ page }) => {
   await expect(lists.nth(0).locator('a')).toHaveCount(6);
   await expect(lists.nth(1).locator('a')).toHaveCount(5);
   await expect(footer.locator('[data-cookie-preferences]')).toBeVisible();
+  const instagram = footer.getByRole('link', { name: 'Instagram — Coco Rosette', exact: true });
+  await expect(instagram).toBeVisible();
+  await expect(instagram).toHaveAttribute('href', 'https://www.instagram.com/coco.rosette.studio/');
   const destinations = await footer.locator('a').evaluateAll((nodes) => nodes.map((node) => new URL(node.href).pathname));
   expect(new Set(destinations).size).toBe(destinations.length);
   expect(destinations).not.toContain('/search');
@@ -51,7 +54,7 @@ test('global identity and a single, aligned footer', async ({ page }) => {
   await noOverflow(page);
 });
 
-test('desktop menu, separate language and country selectors, and bag stay in that order on one row', async ({ page }) => {
+test('desktop header retains menu and bag while localisation moves to the footer', async ({ page }) => {
   test.skip(page.viewportSize().width <= 850, 'Desktop-only layout');
   await visit(page);
   for (const labels of [['Collections', 'À propos'], ['Colecciones', 'Acerca de']]) {
@@ -61,9 +64,10 @@ test('desktop menu, separate language and country selectors, and bag stay in tha
     const nav = await page.locator('.coco-header__navigation--desktop').boundingBox();
     const bag = await page.locator('.coco-header__cart').boundingBox();
     expect(Math.abs(nav.y + nav.height / 2 - bag.y - bag.height / 2)).toBeLessThan(2);
-    const language = await page.locator('.coco-header__localisation select[name="language_code"]').boundingBox();
-    const country = await page.locator('.coco-header__localisation select[name="country_code"]').boundingBox();
-    const boxes = [nav, language, country, bag];
+    await expect(page.locator('.coco-header__localisation')).toHaveCount(0);
+    await expect(page.locator('.coco-footer__localisation select[name="language_code"]')).toBeVisible();
+    await expect(page.locator('.coco-footer__localisation select[name="country_code"]')).toBeVisible();
+    const boxes = [nav, bag];
     for (let index = 1; index < boxes.length; index++) {
       expect(boxes[index].x).toBeGreaterThanOrEqual(boxes[index - 1].x + boxes[index - 1].width);
       expect(Math.abs(boxes[index].y + boxes[index].height / 2 - bag.y - bag.height / 2)).toBeLessThan(2);

@@ -31,10 +31,6 @@
         </nav>
       {% endif %}
 
-      <div class="coco-header__localisation">
-        {% assign desktop_localisation_id = 'HeaderLocalisation-' | append: section.id %}
-        {% render 'localisation-controls', id_prefix: desktop_localisation_id %}
-      </div>
       <a
         class="coco-header__cart"
         href="{{ routes.cart_url }}"
@@ -78,10 +74,6 @@
   .coco-header__logo-image { width: 100%; height: auto; }
   .coco-header__right { display: flex; align-items: center; justify-self: end; gap: clamp(0.75rem, 2vw, 2rem); }
   .coco-mobile-navigation__localisation { padding: 1.25rem; }
-  @media (min-width: 851px) {
-    .coco-header__localisation .coco-localisation { flex-wrap: nowrap; }
-    .coco-header__localisation label { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  }
   @media (min-width: 851px) and (max-width: 1100px) {
     .coco-header__logo { width: 10rem; }
   }
@@ -108,7 +100,6 @@
     .coco-header__logo { width: 12.5rem; justify-self: center; }
     .coco-header__right { grid-column: 3; gap: 0; }
     .coco-header__navigation--desktop { display: none; }
-    .coco-header__localisation { display: none; }
     .coco-mobile-navigation[open] { display: block; width: min(83vw, 21rem); max-width: none; height: 100dvh; max-height: none; margin: 0 auto 0 0; border: 0; padding: 0; background: var(--cr-bg); }
     .coco-mobile-navigation[open] .coco-mobile-navigation__panel { animation: coco-mobile-navigation-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) both; }
     .coco-mobile-navigation[open][data-closing='true'] .coco-mobile-navigation__panel { animation: coco-mobile-navigation-leave 240ms ease-in both; }

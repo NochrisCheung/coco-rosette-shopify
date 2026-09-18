@@ -7,6 +7,31 @@ const themeRoot = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(themeRoot, file), 'utf8');
 const footer = read('sections/footer.liquid');
 const group = JSON.parse(read('sections/footer-group.json').replace(/\/\*[\s\S]*?\*\//g, ''));
+const { renderer } = require('./liquid-fixture.cjs');
+
+test('Instagram uses the approved destination and can be removed through its setting', () => {
+  const schema = JSON.parse(footer.match(/{% schema %}([\s\S]*?){% endschema %}/)[1]);
+  const instagram = schema.settings.find((setting) => setting.id === 'instagram_url');
+  assert.equal(instagram.type, 'url');
+  assert.equal(instagram.default, undefined, 'External URLs belong in saved settings, not url schema defaults');
+  assert.equal(group.sections.footer.settings.instagram_url, 'https://www.instagram.com/coco.rosette.studio/');
+  const data = { section: { id: 'footer', settings: { instagram_url: group.sections.footer.settings.instagram_url }, blocks: [] }, shop: { name: 'Coco Rosette' }, routes: { root_url: '/' } };
+  for (const locale of ['en', 'fr', 'es']) {
+    const html = renderer(locale)('sections/footer.liquid', data);
+    assert.match(html, /href="https:\/\/www.instagram.com\/coco.rosette.studio\/" aria-label="Instagram — Coco Rosette"/);
+    assert.match(html, /aria-hidden="true" focusable="false"/);
+  }
+  data.section.settings.instagram_url = '';
+  assert.doesNotMatch(renderer()('sections/footer.liquid', data), /coco-footer__instagram/);
+});
+
+test('desktop localisation lives in the existing footer and mobile retains its drawer forms', () => {
+  assert.match(footer, /FooterLocalisation-/);
+  assert.match(footer, /@media \(max-width: 850px\)\s*\{\s*\.coco-footer__localisation \{ display: none; \}/);
+  const header = read('sections/header.liquid');
+  assert.doesNotMatch(header, /HeaderLocalisation-|coco-header__localisation/);
+  assert.match(header, /MobileLocalisation-/);
+});
 
 test('the global layout renders one footer group with one footer section', () => {
   assert.equal((read('layout/theme.liquid').match(/{% sections 'footer-group' %}/g) || []).length, 1);
@@ -19,6 +44,7 @@ test('the global layout renders one footer group with one footer section', () =>
 
 test('the approved customer and privacy menus are not replaced by empty settings', () => {
   assert.deepEqual(group.sections.footer.settings, {
+    instagram_url: 'https://www.instagram.com/coco.rosette.studio/',
     brand_menu: 'website-pages',
     menu: 'customer-care',
     privacy_menu: 'privacy-choices',
